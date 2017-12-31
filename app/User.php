@@ -34,6 +34,6 @@ class User extends Authenticatable
 
     public function addSurvey($attributes)
     {
-        $this->surveys()->create($attributes);
+        return $this->surveys()->create($attributes);
     }
 }

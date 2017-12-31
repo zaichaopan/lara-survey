@@ -13,30 +13,56 @@ class SurveyTest extends TestCase
 {
     use  RefreshDatabase;
 
-    /** @test */
-    public function it_adds_multipe_choice_questions()
+    public function setUp()
     {
-        $this->createQuestion('multiple_choice', MultipleChoiceSubmittable::class);
+        parent::setUp();
+        $this->user = factory('App\User')->create();
+        $this->survey = $this->user->addSurvey(['title' => 'foo']);
+    }
+
+    /** @test */
+    public function it_has_an_author()
+    {
+        $this->assertEquals($this->user->id, $this->survey->author->id);
+    }
+
+    /** @test */
+    public function it_adds_multiple_choice_questions()
+    {
+        $question =  $this->createQuestion('multiple_choice');
+        $this->assertQuestionType($question, MultipleChoiceSubmittable::class);
     }
 
     /** @test */
     public function it_adds_open_questions()
     {
-        $this->createQuestion('open', OpenSubmittable::class);
+        $question =  $this->createQuestion('open');
+        $this->assertQuestionType($question, OpenSubmittable::class);
     }
 
     /** @test */
     public function it_adds_scale_questions()
     {
-        $this->createQuestion('scale', ScaleSubmittable::class);
+        $question =  $this->createQuestion('scale');
+        $this->assertQuestionType($question, ScaleSubmittable::class);
     }
 
-    protected function createQuestion($type, $kclass)
+    /** @test */
+    public function it_has_questions()
+    {
+        $question = $this->createQuestion('open');
+        $this->assertTrue($this->survey->questions->contains($question));
+    }
+
+    protected function assertQuestionType($question, $klass)
+    {
+        $this->assertTrue($this->survey->questions->contains($question->id));
+        $this->assertInstanceOf($klass, $question->submittable);
+    }
+
+    protected function createQuestion($type)
     {
         $type = SubmitType::create($type);
-        $survey = factory('App\Survey')->create();
-        $question = $survey->createQuestion('foo')->submitType($type);
-        $this->assertTrue($survey->questions->contains($question->id));
-        $this->assertInstanceOf($kclass, $question->submittable);
+        return $question = $this->survey->createQuestion('foo')->submitType($type);
     }
 }
