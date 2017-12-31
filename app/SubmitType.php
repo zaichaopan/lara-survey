@@ -18,6 +18,6 @@ class SubmitType
             return tap($validTypes[$type])->save();
         }
 
-        throw new Exception('Not a valid question type');
+        throw new Exception;
     }
 }
