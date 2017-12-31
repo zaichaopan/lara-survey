@@ -14,3 +14,5 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::post('/surveys/{survey}/completions', 'CompletionsController@store')->name('completions.store');

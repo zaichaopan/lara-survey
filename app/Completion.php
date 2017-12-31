@@ -17,4 +17,16 @@ class Completion extends Model
     {
         return $this->answers()->create($attributes);
     }
+
+    public function addAnswers($answers)
+    {
+        return $this->answers()->saveMany($answers);
+    }
+
+    public function buildAnswers($answerAttributeArray)
+    {
+        return collect($answerAttributeArray)->map(function ($answerAttributes) {
+            return new Answer(array_intersect_key($answerAttributes, array_flip(['question_id', 'text'])));
+        });
+    }
 }
