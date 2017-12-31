@@ -19,8 +19,20 @@ class Survey extends Model
         return $this->hasMany(Question::class);
     }
 
+    public function completions()
+    {
+        return $this->hasMany(Completion::class);
+    }
+
     public function createQuestion($title)
     {
         return $this->questions()->create(['title' => $title]);
+    }
+
+    public function completedBy(User $user)
+    {
+        return $this->completions()->create([
+            'user_id' => $user->id
+        ]);
     }
 }

@@ -9,6 +9,11 @@ class Question extends Model
     //
     protected $guarded = [];
 
+    public function survey()
+    {
+        return $this->belongsTo(Survey::class);
+    }
+
     public function submittable()
     {
         return $this->morphTo();
@@ -17,6 +22,13 @@ class Question extends Model
     public function options()
     {
         return $this->hasMany(Option::class);
+    }
+
+    public function getSubmitTypeAttribute()
+    {
+        return  $this->submittable_type
+            ? snake_case(class_basename($this->submittable_type))
+            : null;
     }
 
     public function submitType($type)
