@@ -26,4 +26,14 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function surveys()
+    {
+        return $this->hasMany(Survey::class, 'author_id');
+    }
+
+    public function addSurvey($attributes)
+    {
+        $this->surveys()->create($attributes);
+    }
 }
