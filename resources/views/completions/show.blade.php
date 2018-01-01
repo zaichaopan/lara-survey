@@ -4,7 +4,7 @@
         @include("questions._{$answer->question->submitType}", [
             'question' => $answer->question,
             'answer' => $answer,
-             'index' => $index
+            'index' => $index
         ])
     </ul>
 @endforeach

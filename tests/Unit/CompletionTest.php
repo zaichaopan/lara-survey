@@ -29,6 +29,23 @@ class CompletionTest extends TestCase
         $this->assertCount(2, $completion->fresh()->answers);
     }
 
+    /** @test */
+    public function it_can_build_answers_from_attributes()
+    {
+        $survey = factory('App\Survey')->create();
+
+        $multipleChoiceQuestion = factory('App\Question')
+            ->states('multiple_choice')
+            ->create(['survey_id' => $survey->id ])
+            ->addOption(['text' => 'foo']);
+
+         $completion = factory('App\Completion')->create(['survey_id' => $survey->id]);
+         $answers = $completion->buildAnswersFromQuestions();
+         $this->assertCount(1, $answers);
+         $this->assertEquals($multipleChoiceQuestion->id, $answers->first()->question->id);
+         $this->assertEquals('multiple_choice_submittable', $answers->first()->question->submitType);
+    }
+
     protected function answerAttributeArray()
     {
         return [

@@ -44,4 +44,12 @@ class Question extends Model
     {
         return $this->options()->create($attributes);
     }
+
+    public function buildAnswerAttributes()
+    {
+        return  [
+            'question_id' => $this->id,
+            'text' => null
+        ];
+    }
 }

@@ -9,6 +9,8 @@ class Survey extends Model
     //
     protected $guarded = [];
 
+    protected $with = ['author', 'questions'];
+
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');

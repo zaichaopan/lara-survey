@@ -10,6 +10,11 @@ class Completion extends Model
 
     protected $with = ['answers', 'participant'];
 
+    public function survey()
+    {
+        return $this->belongsTo(Survey::class);
+    }
+
     public function participant()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -39,5 +44,11 @@ class Completion extends Model
                 array_flip(['question_id', 'text'])
             ));
         });
+    }
+
+    public function buildAnswersFromQuestions()
+    {
+        $answerAttributeArray =  $this->survey->questions->map->buildAnswerAttributes();
+        return $this->buildAnswers($answerAttributeArray);
     }
 }

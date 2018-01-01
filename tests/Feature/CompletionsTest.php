@@ -28,6 +28,7 @@ class CompletionsTest extends TestCase
             ->states('scale')
             ->create(['survey_id' => $this->survey->id]);
     }
+
     /** @test */
     public function user_can_complete_a_survey()
     {

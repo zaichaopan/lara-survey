@@ -15,5 +15,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/surveys/{survey}', 'SurveysController@show')->name('surveys.show');
 Route::post('/surveys/{survey}/completions', 'CompletionsController@store')->name('completions.store');
 Route::get('/completions/{completion}', 'CompletionsController@show')->name('completions.show');
