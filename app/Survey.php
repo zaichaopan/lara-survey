@@ -13,7 +13,7 @@ class Survey extends Model
 
     public function author()
     {
-        return $this->belongsTo(User::class, 'author_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function questions()
@@ -26,9 +26,9 @@ class Survey extends Model
         return $this->hasMany(Completion::class);
     }
 
-    public function createQuestion($title)
+    public function createQuestion($attributes)
     {
-        return $this->questions()->create(['title' => $title]);
+        return $this->questions()->create($attributes);
     }
 
     public function completedBy(User $user)

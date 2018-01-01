@@ -7,6 +7,11 @@ use App\Survey;
 
 class SurveysController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function show(Survey $survey)
     {
         return view('surveys.show', compact('survey'));
@@ -19,7 +24,8 @@ class SurveysController extends Controller
 
     public function store()
     {
-        $survey = auth()->user()->addSurvey(request([ 'title' ]));
+        $validatedData = request()->validate(['title' => 'required']);
+        $survey = auth()->user()->addSurvey($validatedData);
         return view('surveys.show', compact('survey'));
     }
 }

@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model
 {
-    //
+    const SUBMITTABLE_TYPES = [
+        'multiple_choice_submittable',
+        'open_submittable',
+        'scale_submittable'
+    ];
+
     protected $guarded = [];
 
     protected $with = ['options', 'submittable'];
