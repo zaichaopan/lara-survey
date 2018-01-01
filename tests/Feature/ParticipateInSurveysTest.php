@@ -18,7 +18,6 @@ class ParticipateInSurveysTest extends TestCase
         $this->multipleChoiceQuestion = factory('App\Question')
             ->states('multiple_choice')
             ->create(['survey_id' => $this->survey->id]);
-        //->addOption(['text' => 'foo']);
 
         $this->openQuestion = factory('App\Question')
             ->states('open')
