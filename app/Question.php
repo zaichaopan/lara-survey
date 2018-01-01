@@ -38,7 +38,7 @@ class Question extends Model
             : null;
     }
 
-    public function submitType($type)
+    public function associateType($type)
     {
         return tap($this, function ($question) use ($type) {
             $question->submittable()->associate($type)->save();
@@ -48,6 +48,11 @@ class Question extends Model
     public function addOption($attributes)
     {
         return $this->options()->create($attributes);
+    }
+
+    public function addOptions($options)
+    {
+        return $this->options()->saveMany($options);
     }
 
     public function buildAnswerAttributes()

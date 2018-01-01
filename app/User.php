@@ -29,7 +29,7 @@ class User extends Authenticatable
 
     public function surveys()
     {
-        return $this->hasMany(Survey::class, 'author_id');
+        return $this->hasMany(Survey::class);
     }
 
     public function addSurvey($attributes)

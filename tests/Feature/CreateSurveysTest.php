@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
+use App\MultipleChoiceSubmittable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CreateSurveysTest extends TestCase
@@ -161,6 +162,25 @@ class CreateSurveysTest extends TestCase
         ])->assertSessionHasErrors('maximum');
     }
 
+    /** @test */
+    public function author_can_add_multiple_choice_questions_to_his_survey()
+    {
+        $this->withoutExceptionHandling();
+        $this->createQuestion([
+            'question_submittable_type' => 'multiple_choice_submittable',
+            'options' => ['foo', 'bar', 'baz'] ]);
+
+        $survey = auth()->user()->surveys->first();
+        $question = $survey->fresh()->questions->first();
+        $this->assertInstanceOf(MultipleChoiceSubmittable::class, $question->submittable);
+        $this->assertEquals(['foo', 'bar', 'baz'], $question->options->pluck('text')->all());
+    }
+
+    /** @test */
+    public function it_()
+    {
+    }
+
     protected function createQuestion($overrides = [])
     {
         $this->login();
@@ -178,17 +198,8 @@ class CreateSurveysTest extends TestCase
         ]), array_merge($question, $overrides));
     }
 
-    /** @test */
-    public function author_can_add_multiple_choice_questions_to_his_survey()
-    {
-        $this->login();
-        $survey = factory('App\Survey')->create(['user_id' => auth()->id()]);
 
-        $this->get(route('questions.create', [
-            'survey' => $survey,
-            'question_submittable_type' => 'multiple_choice_submittable'
-        ]))->assertSee('Option');
-    }
+
 
     protected function login($user = null)
     {

@@ -18,7 +18,8 @@ class QuestionsController extends Controller
     public function create(Survey $survey)
     {
         $this->authorize('update', $survey);
-        abort_unless(in_array($questionSubmittableType = request('question_submittable_type'), Question::SUBMITTABLE_TYPES), 404);
+        $questionSubmittableType = request('question_submittable_type');
+        abort_unless(in_array($questionSubmittableType, Question::SUBMITTABLE_TYPES), 404);
         return view('questions.create', compact('questionSubmittableType', 'survey'));
     }
 
@@ -26,17 +27,16 @@ class QuestionsController extends Controller
     {
         $this->authorize('update', $survey);
 
-        request()->validate([
+        $questionAttributes = request()->validate([
             'title' => 'required',
             'question_submittable_type' => ['required', Rule::in(Question::SUBMITTABLE_TYPES)],
-         //   'options' => 'options',
+            'options' => 'options',
             'minimum' => 'minscale',
             'maximum' => 'maxscale',
         ]);
 
-        $question = $survey->createQuestion(request(['title']))
-            ->submitType(SubmitType::create($submittableType));
+        $survey->addQuestion($questionAttributes);
 
-        return view('questions.edit', compact('survey', 'question'));
+        return redirect(route('surveys.show', compact('survey')));
     }
 }
