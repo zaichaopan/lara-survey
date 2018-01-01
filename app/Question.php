@@ -9,6 +9,8 @@ class Question extends Model
     //
     protected $guarded = [];
 
+    protected $with = ['options', 'submittable'];
+
     public function survey()
     {
         return $this->belongsTo(Survey::class);
@@ -26,8 +28,6 @@ class Question extends Model
 
     public function getSubmitTypeAttribute()
     {
-        var_dump($this->submittable_type);
-
         return  $this->submittable_type
             ? snake_case(class_basename($this->submittable_type))
             : null;

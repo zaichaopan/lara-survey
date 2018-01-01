@@ -16,3 +16,4 @@ Route::get('/', function () {
 });
 
 Route::post('/surveys/{survey}/completions', 'CompletionsController@store')->name('completions.store');
+Route::get('/completions/{completion}', 'CompletionsController@show')->name('completions.show');

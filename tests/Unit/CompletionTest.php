@@ -25,8 +25,7 @@ class CompletionTest extends TestCase
     public function it_can_add_answers()
     {
         $completion = factory('App\Completion')->create();
-        $answers = $completion->buildAnswers($this->answerAttributeArray());
-        $completion->addAnswers($answers);
+        $completion->addAnswers($this->answerAttributeArray());
         $this->assertCount(2, $completion->fresh()->answers);
     }
 
