@@ -21,15 +21,14 @@ class UpdateQuestionsTest extends TestCase
         $question = factory('App\Question')->create(['survey_id' => $survey->id]);
         $jane = factory('App\User')->create();
 
-        $this->get(route('surveys.questions.edit', ['survey' => $survey, 'question' => $question]))->assertRedirect('login');
+        $this->viewEditForm($question)->assertRedirect('login');
 
         // redirect because of unauthenticated
-        $this->put(route('surveys.questions.update', ['survey' => $survey, 'question' => $question]), [])->assertStatus(302);
+        $this->updateQuestion($question, [])->assertStatus(302);
 
         $this->actingAs($jane);
-        $this->get(route('surveys.questions.edit', ['survey' => $survey, 'question' => $question]))->assertStatus(403);
-
-        $this->put(route('surveys.questions.update', ['survey' => $survey, 'question' => $question]), [])->assertStatus(403);
+        $this->viewEditForm($question)->assertStatus(403);
+        $this->updateQuestion($question, [])->assertStatus(403);
     }
 
     /** @test */
@@ -83,6 +82,12 @@ class UpdateQuestionsTest extends TestCase
         $this->assertEquals(10, $question->submittable->maximum);
     }
 
+    protected function viewEditForm($question)
+    {
+        return $this->get(route('surveys.questions.edit', [
+            'survey' => $question->survey_id,
+            'question' => $question]));
+    }
     protected function updateQuestion($question, $data)
     {
         return $this->patch(route('surveys.questions.update', [
