@@ -20,10 +20,10 @@ class ScaleSubmittable extends Model
         $this->maximum = 1;
     }
 
-    // public function updateAttributes($questionAttributes)
-    // {
-    //     $this->minimum =  $questionAttributes['minimum'];
-    //     $this->maximum =  $questionAttributes['maximum'];
-    //     return tap($this)->save();
-    // }
+    public function updateAttributes($questionAttributes)
+    {
+        $this->minimum =  $questionAttributes['minimum'];
+        $this->maximum =  $questionAttributes['maximum'];
+        return tap($this)->save();
+    }
 }
