@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Optional;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,9 +13,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        \Validator::extend('options', 'App\Rules\Options@passes');
-        \Validator::extend('minscale', 'App\Rules\MinScale@passes');
-        \Validator::extend('maxscale', 'App\Rules\MaxScale@passes');
     }
 
     /**
