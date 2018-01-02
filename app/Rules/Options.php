@@ -9,11 +9,11 @@ class Options implements Rule
 {
     protected $request;
 
-   /**
-    * Constructor
-    *
-    * @param Request $request
-    */
+    /**
+     * Constructor
+     *
+     * @param Request $request
+     */
     public function __construct(Request $request)
     {
         $this->request = $request;
@@ -28,7 +28,7 @@ class Options implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $this->request->question_submittable_type !== 'multiple_choice_submittable' || (is_array($value) &&  count($value));
+        return $this->request->submittable_type !== 'multiple_choice_submittable' || (is_array($value) &&  count($value));
     }
 
     /**

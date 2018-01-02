@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Question;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class QuestionForm extends FormRequest
@@ -26,7 +27,7 @@ class QuestionForm extends FormRequest
     {
         return [
             'title' => 'required',
-            'question_submittable_type' => ['required', Rule::in(Question::SUBMITTABLE_TYPES)],
+            'submittable_type' => ['required', Rule::in(Question::SUBMITTABLE_TYPES)],
             'options' => 'options',
             'minimum' => 'minscale',
             'maximum' => 'maxscale',
