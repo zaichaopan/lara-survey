@@ -15,9 +15,9 @@ class CreateQuestionsTest extends TestCase
         $john = factory('App\User')->create();
         $jane = factory('App\User')->create();
         $survey = factory('App\Survey')->create(['user_id' => $john->id]);
-        $this->get(route('questions.create', ['survey' => 1]))->assertRedirect('login');
+        $this->get(route('surveys.questions.create', ['survey' => 1]))->assertRedirect('login');
         $this->login($jane);
-        $this->get(route('questions.create', ['survey' => $survey]))->assertStatus(403);
+        $this->get(route('surveys.questions.create', ['survey' => $survey]))->assertStatus(403);
     }
 
     /** @test */
@@ -26,7 +26,7 @@ class CreateQuestionsTest extends TestCase
         $jane = factory('App\User')->create();
         $survey = factory('App\Survey')->create(['user_id' => $jane->id]);
         $this->login($jane);
-        $this->get(route('questions.create', [
+        $this->get(route('surveys.questions.create', [
             'survey' => $survey,
             'submittable_type' => 'invalid_type'
         ]))->assertStatus(404);
@@ -149,7 +149,7 @@ class CreateQuestionsTest extends TestCase
                 'scale_submittable'])
         ];
 
-        return $this->post(route('questions.store', [
+        return $this->post(route('surveys.questions.store', [
             'survey' => $survey,
         ]), array_merge($question, $overrides));
     }
