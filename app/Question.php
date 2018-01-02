@@ -50,14 +50,6 @@ class Question extends Model
         return $this->options()->saveMany($options);
     }
 
-    // public function buildAnswerAttributes()
-    // {
-    //     return  [
-    //         'question_id' => $this->id,
-    //         'text' => null
-    //     ];
-    // }
-
     public function updateAttributes(array $attributes)
     {
         $this->update(['title' => $attributes['title']]);
