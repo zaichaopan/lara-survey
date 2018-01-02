@@ -8,6 +8,7 @@ use App\SubmitType;
 use App\ScaleSubmittable;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\QuestionForm;
 
 class QuestionsController extends Controller
 {
@@ -19,6 +20,7 @@ class QuestionsController extends Controller
     public function create(Survey $survey)
     {
         $this->authorize('update', $survey);
+        //abort_unless(in_array($submittableType, static::SUBMITTABLE_TYPES), 404);
         $question = (new Question)->buildAttributes(request('question_submittable_type'));
         return view('questions.create', compact('question', 'survey'));
     }
@@ -29,37 +31,17 @@ class QuestionsController extends Controller
         return view('questions.edit', compact('question', 'survey'));
     }
 
-    public function store(Survey $survey)
+    public function store(Survey $survey, QuestionForm $questionForm)
     {
         $this->authorize('update', $survey);
-
-        $questionAttributes = request()->validate([
-            'title' => 'required',
-            'question_submittable_type' => ['required', Rule::in(Question::SUBMITTABLE_TYPES)],
-            'options' => 'options',
-            'minimum' => 'minscale',
-            'maximum' => 'maxscale',
-        ]);
-
-        $survey->addQuestion($questionAttributes);
-
+        $survey->addQuestion($questionForm->data());
         return redirect(route('surveys.show', compact('survey')));
     }
 
-    public function update(Survey $survey, Question $question)
+    public function update(Survey $survey, Question $question, QuestionForm $questionForm)
     {
         $this->authorize('update', $survey);
-
-        $questionAttributes = request()->validate([
-            'title' => 'required',
-            'question_submittable_type' => ['required', Rule::in(Question::SUBMITTABLE_TYPES)],
-            'options' => 'options',
-            'minimum' => 'minscale',
-            'maximum' => 'maxscale',
-        ]);
-
-        $question->updateAttributes($questionAttributes);
-
+        $question->updateAttributes($questionForm->data());
         return redirect(route('surveys.show', compact('survey')));
     }
 }

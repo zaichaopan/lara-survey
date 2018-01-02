@@ -58,29 +58,19 @@ class Question extends Model
     //     ];
     // }
 
-    public function updateAttributes(array $questionAttributes)
+    public function updateAttributes(array $attributes)
     {
-        $this->update(['title' => $questionAttributes['title']]);
-
-        if (method_exists($this->submittable, 'updateAttributes')) {
-            $this->submittable->updateAttributes($questionAttributes);
-        }
-
-        return $this->fresh();
+        $this->update(['title' => $attributes['title']]);
+        optional_method($this->submittable)->updateAttributes($attributes);
+        return $this;
     }
 
     public function buildAttributes($submittableType)
     {
-        abort_unless(in_array($submittableType, static::SUBMITTABLE_TYPES), 404);
         $class =  "App\\" . studly_case($submittableType);
-        $submittable  = new $class;
-        $this->submittable = $submittable;
         $this->submittable_type = $class;
-
-        if (method_exists($submittable, 'buildAttributes')) {
-            $submittable->buildAttributes($this);
-        }
-
+        $this->submittable = new $class;
+        optional_method($this->submittable)->buildAttributes($this);
         return $this;
     }
 }

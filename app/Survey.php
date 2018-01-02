@@ -25,16 +25,11 @@ class Survey extends Model
     //     return $this->hasMany(Completion::class);
     // }
 
-    public function addQuestion(array $questionAttributes)
+    public function addQuestion(array $attributes)
     {
-        $question  = $this->questions()->create([
-            'title' => $questionAttributes['title']
-        ]);
-
-        $submittableType =  "App\\" . studly_case($questionAttributes['submittable_type']);
-
-        (new $submittableType)->buildQuestion($question, $questionAttributes);
-
+        $question  = $this->questions()->create(['title' => $attributes['title']]);
+        $submittableType =  "App\\" . studly_case($attributes['submittable_type']);
+        (new $submittableType)->buildQuestion($question, $attributes);
         return $question;
     }
 

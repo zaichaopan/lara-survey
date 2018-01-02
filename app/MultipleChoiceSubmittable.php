@@ -36,9 +36,7 @@ class MultipleChoiceSubmittable extends Model
         $optionAttributes = $questionAttributes['options'];
 
         collect($this->question->options)->each(function ($option, $key) use ($optionAttributes) {
-            $option->update([
-                'text' => $optionAttributes[$key]
-            ]);
+            $option->update(['text' => $optionAttributes[$key]]);
         });
     }
 }
