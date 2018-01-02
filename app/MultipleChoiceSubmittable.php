@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class MultipleChoiceSubmittable extends Model
 {
+    protected $guarded = [];
+
     public function question()
     {
         return $this->morphOne('App\Question', 'submittable');
     }
-
-    protected $guarded = [];
 
     public function buildQuestion(Question $question, array $questionAttributes)
     {
