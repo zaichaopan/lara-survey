@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Question;
 use App\SubmitType;
 use Tests\TestCase;
 use App\OpenSubmittable;
@@ -29,32 +30,42 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_adds_multiple_choice_questions()
     {
-        $question =  $this->createQuestion('multiple_choice');
+        $question = $this->addQuestion([
+            'submittable_type' => 'multiple_choice_submittable',
+            'options' => ['foo', 'bar', 'baz']
+        ]);
+
         $this->assertQuestionType($question, MultipleChoiceSubmittable::class);
+        $this->assertEquals(['foo', 'bar', 'baz'], $question->options->pluck('text')->all());
     }
 
     /** @test */
     public function it_adds_open_questions()
     {
-        $question =  $this->createQuestion('open');
+        $question = $this->addQuestion(['submittable_type' => 'open_submittable']);
         $this->assertQuestionType($question, OpenSubmittable::class);
     }
 
     /** @test */
     public function it_adds_scale_questions()
     {
-        $question =  $this->createQuestion('scale');
+        $question = $this->addQuestion([
+            'submittable_type' => 'scale_submittable',
+            'minimum' => 1,
+            'maximum' => 10
+        ]);
         $this->assertQuestionType($question, ScaleSubmittable::class);
+        $this->assertEquals(1, $question->submittable->minimum);
+        $this->assertEquals(10, $question->submittable->maximum);
     }
 
     /** @test */
     public function it_has_questions()
     {
-        $question = $this->createQuestion('open');
+        $question = $this->addQuestion(['submittable_type' => 'open_submittable']);
         $this->assertTrue($this->survey->questions->contains($question));
     }
 
-    /** @test */
     public function it_can_be_completed()
     {
         $user = factory('App\User')->create();
@@ -68,9 +79,13 @@ class SurveyTest extends TestCase
         $this->assertInstanceOf($klass, $question->submittable);
     }
 
-    protected function createQuestion($type)
+    protected function addQuestion($overrides)
     {
-        $type = SubmitType::create($type);
-        return $question = $this->survey->createQuestion('foo')->submitType($type);
+        $data = [
+            'title' =>  'foo',
+            'submittable_type' => array_random(Question::SUBMITTABLE_TYPES)
+        ];
+
+        return $this->survey->addQuestion(array_merge($data, $overrides));
     }
 }

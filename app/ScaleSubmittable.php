@@ -8,8 +8,22 @@ class ScaleSubmittable extends Model
 {
     protected $guarded = [];
 
-    public function updateScale($scale)
+    public function buildQuestion(Question $question, array $questionAttributes)
     {
-        return tap($this)->update($scale);
+        $this->updateAttributes($questionAttributes);
+        $question->associateType($this);
+    }
+
+    public function buildAttributes(Question $question)
+    {
+        $this->minimum = 0;
+        $this->maximum = 1;
+    }
+
+    public function updateAttributes($questionAttributes)
+    {
+        $this->minimum =  $questionAttributes['minimum'];
+        $this->maximum =  $questionAttributes['maximum'];
+        return tap($this)->save();
     }
 }

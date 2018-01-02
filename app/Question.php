@@ -31,7 +31,7 @@ class Question extends Model
         return $this->hasMany(Option::class);
     }
 
-    public function getSubmitTypeAttribute()
+    public function submittableType()
     {
         return  $this->submittable_type
             ? snake_case(class_basename($this->submittable_type))
@@ -45,21 +45,42 @@ class Question extends Model
         });
     }
 
-    public function addOption($attributes)
-    {
-        return $this->options()->create($attributes);
-    }
-
     public function addOptions($options)
     {
         return $this->options()->saveMany($options);
     }
 
-    public function buildAnswerAttributes()
+    // public function buildAnswerAttributes()
+    // {
+    //     return  [
+    //         'question_id' => $this->id,
+    //         'text' => null
+    //     ];
+    // }
+
+    public function updateAttributes(array $questionAttributes)
     {
-        return  [
-            'question_id' => $this->id,
-            'text' => null
-        ];
+        $this->update(['title' => $questionAttributes['title']]);
+
+        if (method_exists($this->submittable, 'updateAttributes')) {
+            $this->submittable->updateAttributes($questionAttributes);
+        }
+
+        return $this->fresh();
+    }
+
+    public function buildAttributes($submittableType)
+    {
+        abort_unless(in_array($submittableType, static::SUBMITTABLE_TYPES), 404);
+        $class =  "App\\" . studly_case($submittableType);
+        $submittable  = new $class;
+        $this->submittable = $submittable;
+        $this->submittable_type = $class;
+
+        if (method_exists($submittable, 'buildAttributes')) {
+            $submittable->buildAttributes($this);
+        }
+
+        return $this;
     }
 }

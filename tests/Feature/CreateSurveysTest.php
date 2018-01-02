@@ -49,7 +49,7 @@ class CreateSurveysTest extends TestCase
     }
 
     /** @test */
-    public function non_auth_can_not_add_questions_to_a_survey()
+    public function non_author_can_not_add_questions_to_a_survey()
     {
         $this->get(route('questions.create', ['survey' => 1]))->assertRedirect('login');
         $john = factory('App\User')->create();
@@ -163,21 +163,21 @@ class CreateSurveysTest extends TestCase
     }
 
     /** @test */
-    public function author_can_add_multiple_choice_questions_to_his_survey()
+    public function author_can_add_multiple_choice_questions()
     {
-        $this->withoutExceptionHandling();
         $this->createQuestion([
             'question_submittable_type' => 'multiple_choice_submittable',
             'options' => ['foo', 'bar', 'baz'] ]);
 
         $survey = auth()->user()->surveys->first();
         $question = $survey->fresh()->questions->first();
+
         $this->assertInstanceOf(MultipleChoiceSubmittable::class, $question->submittable);
         $this->assertEquals(['foo', 'bar', 'baz'], $question->options->pluck('text')->all());
     }
 
-    /** @test */
-    public function it_()
+
+    public function author_can_update_mulitple_choice_questions()
     {
     }
 
@@ -197,9 +197,6 @@ class CreateSurveysTest extends TestCase
             'survey' => $survey,
         ]), array_merge($question, $overrides));
     }
-
-
-
 
     protected function login($user = null)
     {
