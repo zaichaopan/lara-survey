@@ -153,10 +153,4 @@ class CreateQuestionsTest extends TestCase
             'survey' => $survey,
         ]), array_merge($question, $overrides));
     }
-
-    protected function login($user = null)
-    {
-        $user = $user ?? factory('App\User')->create();
-        $this->actingAs($user);
-    }
 }

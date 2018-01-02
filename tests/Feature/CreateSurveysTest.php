@@ -46,10 +46,4 @@ class CreateSurveysTest extends TestCase
         $this->assertCount(1, auth()->user()->surveys);
         $this->assertEquals('foo', auth()->user()->surveys->first()->title);
     }
-
-    protected function login($user = null)
-    {
-        $user = $user ?? factory('App\User')->create();
-        $this->actingAs($user);
-    }
 }
