@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
+use App\OpenSubmittable;
+use App\ScaleSubmittable;
+use App\MultipleChoiceSubmittable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CreateQuestionsTest extends TestCase
@@ -123,10 +126,11 @@ class CreateQuestionsTest extends TestCase
         ])->assertSessionHasErrors('maximum');
     }
 
+    /** @test */
     public function author_can_add_multiple_choice_questions()
     {
         $this->createQuestion([
-            'question_submittable_type' => 'multiple_choice_submittable',
+            'submittable_type' => 'multiple_choice_submittable',
             'options' => ['foo', 'bar', 'baz'] ]);
 
         $survey = auth()->user()->surveys->first();
@@ -136,6 +140,29 @@ class CreateQuestionsTest extends TestCase
         $this->assertEquals(['foo', 'bar', 'baz'], $question->options->pluck('text')->all());
     }
 
+    /** @test */
+    public function author_can_add_open_questions()
+    {
+        $this->createQuestion(['submittable_type' => 'open_submittable']);
+        $survey = auth()->user()->surveys->first();
+        $question = $survey->fresh()->questions->first();
+        $this->assertInstanceOf(OpenSubmittable::class, $question->submittable);
+    }
+
+    /** @test */
+    public function author_can_add_scale_questions()
+    {
+        $this->createQuestion([
+            'submittable_type' => 'scale_submittable',
+            'minimum' => 1,
+            'maximum' => 10
+        ]);
+        $survey = auth()->user()->surveys->first();
+        $question = $survey->fresh()->questions->first();
+        $this->assertInstanceOf(ScaleSubmittable::class, $question->submittable);
+        $this->assertEquals(1, $question->submittable->minimum);
+        $this->assertEquals(10, $question->submittable->maximum);
+    }
 
     protected function createQuestion($overrides = [])
     {

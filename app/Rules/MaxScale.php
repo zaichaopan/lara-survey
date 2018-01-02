@@ -29,7 +29,7 @@ class MaxScale implements Rule
     public function passes($attribute, $value)
     {
         return $this->request->submittable_type !== 'scale_submittable' ||
-        (is_int($value) && $value > $this->request->maximum);
+        (is_int($value) && $value > $this->request->minimum);
     }
 
     /**
