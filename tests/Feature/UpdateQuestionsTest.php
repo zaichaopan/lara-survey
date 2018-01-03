@@ -36,11 +36,7 @@ class UpdateQuestionsTest extends TestCase
     {
         $question = $this->createQuestion(MultipleChoiceSubmittable::class);
 
-        $question->addOptions([
-            new Option(['text' => 'foo']),
-            new Option(['text' => 'bar']),
-            new Option(['text' => 'baz']),
-        ]);
+        $question->addOptions($this->options());
 
         $this->updateQuestion($question, [
             'title' => 'new title',
@@ -85,29 +81,36 @@ class UpdateQuestionsTest extends TestCase
     /** @test */
     public function author_can_change_question_type()
     {
-        $this->withoutExceptionHandling();
         $question = $this->createQuestion(MultipleChoiceSubmittable::class);
         $question->addOptions($this->options());
-        $this->get(route('questions.types.create', [
-            'question' => $question,
-            'submittable_type' => 'open_submittable'
-        ]))->assertViewIs('types.create')->assertSee($question->title);
+        $this->viewChangeTypeForm($question, 'open_submittable');
+        $this->changeType($question, ['submittable_type' => 'open_submittable']);
+        $this->assertInstanceOf(OpenSubmittable::class, $question->fresh()->submittable);
 
-        $this->post(route('questions.types.store', [
-            'question' => $question,
-            'submittable_type' => 'open_submittable'
-        ]))->assertStatus(200);
+        $this->viewChangeTypeForm($question, 'scale_submittable')
+            ->assertSee('Minimum')
+            ->assertSee('Maximum');
 
-        //     $this->get(route('questions.types.create', [
-    //         'question' => $question,
-    //         'submittable_type' => 'scale_submittable'
-    //     ]))->assertViewIs('types.create')
-    //         ->assertSee('Minimum')
-    //         ->assertSee('Maximum');
+        $this->changeType($question, [
+            'submittable_type' => 'scale_submittable',
+            'minimum' => 1,
+            'maximum' => 10
+        ]);
+        $question = $question->fresh();
+        $this->assertInstanceOf(ScaleSubmittable::class, $question->submittable);
+        $this->assertEquals(1, $question->submittable->minimum);
+        $this->assertEquals(10, $question->submittable->maximum);
+
+        $this->viewChangeTypeForm($question, 'multiple_choice_submittable')->assertSee('Option');
+        $this->changeType($question, [
+           'submittable_type' => 'multiple_choice_submittable',
+            'options' => ['foo', 'bar', 'baz']
+         ]);
+        $question = $question->fresh();
+        $this->assertInstanceOf(MultipleChoiceSubmittable::class, $question->submittable);
+        $this->assertCount(3, $question->options);
+        $this->assertEquals(['foo', 'bar', 'baz'], $question->options->pluck('text')->all());
     }
-
-
-
 
     protected function options()
     {
@@ -124,11 +127,25 @@ class UpdateQuestionsTest extends TestCase
             'survey' => $question->survey_id,
             'question' => $question]));
     }
+
     protected function updateQuestion($question, $data)
     {
         return $this->patch(route('surveys.questions.update', [
             'survey' => $question->survey_id, 'question'=> $question
         ]), $data);
+    }
+
+    protected function viewChangeTypeForm($question, $submittableType)
+    {
+        return $this->get(route('questions.types.create', [
+            'question' => $question,
+            'submittable_type' => $submittableType
+        ]))->assertViewIs('types.create')->assertSee($question->title);
+    }
+
+    protected function changeType($question, $data)
+    {
+        return $this->post(route('questions.types.store', ['question' => $question]), $data);
     }
 
     protected function createQuestion($submittableClass)

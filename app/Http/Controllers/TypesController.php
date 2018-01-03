@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Question;
 use Illuminate\Http\Request;
-use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Validation\Rule;
 
 class TypesController extends Controller
 {
@@ -27,9 +27,8 @@ class TypesController extends Controller
 
         $question->switchType($questionAttributes);
 
-        return redirect(route('surveys.questions', [
-            'survey' => $question->survey,
-            'question' => $question
+        return redirect(route('surveys.show', [
+            'survey' => $question->survey
         ]));
     }
 }

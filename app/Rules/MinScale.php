@@ -29,7 +29,7 @@ class MinScale implements Rule
     public function passes($attribute, $value)
     {
         return $this->request->submittable_type !== 'scale_submittable' ||
-        (is_int($value) && $value >= 0);
+        (is_numeric($value) && $value >= 0);
     }
 
     /**
