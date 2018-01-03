@@ -65,4 +65,27 @@ class Question extends Model
         optional_method($this->submittable)->buildAttributes($this);
         return $this;
     }
+
+    public function switchType($attributes)
+    {
+        optional_method($this->submittable)->clean();
+        $this->dissociateType();
+        $newSubmittableType =  "App\\" . studly_case($attributes['submittable_type']);
+        (new $newSubmittableType)->buildQuestion($this, $attributes);
+        return $this;
+    }
+
+    public function deleteOptions()
+    {
+        $this->options()->delete();
+    }
+
+    public function dissociateType()
+    {
+        return tap($this, function ($question) {
+            $submittable = $question->submittable;
+            $question->submittable()->dissociate($submittable)->save();
+            $submittable->delete();
+        });
+    }
 }

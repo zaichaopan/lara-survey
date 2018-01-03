@@ -39,4 +39,9 @@ class MultipleChoiceSubmittable extends Model
             $option->update(['text' => $optionAttributes[$key]]);
         });
     }
+
+    public function clean()
+    {
+        $this->question->deleteOptions();
+    }
 }

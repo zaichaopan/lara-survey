@@ -104,6 +104,67 @@ class QuestionTest extends TestCase
         $this->assertInstanceOf(OpenSubmittable::class, $openQuestion->submittable);
     }
 
+    /** @test */
+    public function it_can_delete_options()
+    {
+        $question = $this->createQuestion(MultipleChoiceSubmittable::class);
+        $question->addOptions([
+            new Option(['text' => 'foo']),
+            new Option(['text' => 'bar']),
+            new Option(['text' => 'baz']),
+        ]);
+       
+        $this->assertCount(3, $question->fresh()->options);
+        $question->deleteOptions();
+        $this->assertCount(0, $question->fresh()->options);
+        $this->assertEquals(0, Option::count());
+    }
+
+    /** @test */
+    public function it_can_dissociate_submittable_type()
+    {
+        $this->dissociateType(MultipleChoiceSubmittable::class);
+        $this->dissociateType(OpenSubmittable::class);
+        $this->dissociateType(ScaleSubmittable::class);
+     }
+
+     /** @test */
+     public function it_can_swith_type()
+     {
+        $question = $this->createQuestion(MultipleChoiceSubmittable::class);
+        
+        $question->addOptions([
+            new Option(['text' => 'foo']),
+            new Option(['text' => 'bar']),
+            new Option(['text' => 'baz']),
+        ]);
+        
+        $question->switchType(['submittable_type' => 'open_submittable']);
+        $question = $question->fresh();
+        $this->assertInstanceOf(OpenSubmittable::class, $question->submittable);
+        $this->assertEquals(0, Option::count());
+
+        $question->switchType([
+            'submittable_type' => 'scale_submittable',
+            'minimum' => 1,
+            'maximum' => 10
+        ]);
+        $question = $question->fresh();
+        $this->assertInstanceOf(ScaleSubmittable::class, $question->submittable);
+        $this->assertEquals(1, $question->submittable->minimum);
+        $this->assertEquals(10, $question->submittable->maximum);
+
+        $question->switchType([
+            'submittable_type' => 'multiple_choice_submittable',
+            'options' => ['foo', 'bar', 'baz']
+        ]);
+        $question = $question->fresh();
+        $this->assertInstanceOf(MultipleChoiceSubmittable::class, $question->submittable);        
+        $this->assertEquals([
+            'foo', 'bar', 'baz'
+        ], $question->options->pluck('text')->all());
+     }
+
     protected function createQuestion($submittableClass)
     {
         $question = factory('App\Question')->create();
@@ -111,5 +172,14 @@ class QuestionTest extends TestCase
         $submittable->save();
         $question = $question->associateType($submittable);
         return $question;
+    }
+
+    protected function dissociateType($submittableTypeClass)
+    {
+        $question = $this->createQuestion($submittableTypeClass);
+        $question = $question->fresh();
+        $this->assertInstanceOf($submittableTypeClass, $question->submittable);
+        $question->dissociateType();
+        $this->assertNull($question->submittable);  
     }
 }

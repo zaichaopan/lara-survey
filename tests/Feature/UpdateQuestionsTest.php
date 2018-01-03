@@ -26,7 +26,7 @@ class UpdateQuestionsTest extends TestCase
         // redirect because of unauthenticated
         $this->updateQuestion($question, [])->assertStatus(302);
 
-        $this->actingAs($jane);
+        $this->login($jane);
         $this->viewEditForm($question)->assertStatus(403);
         $this->updateQuestion($question, [])->assertStatus(403);
     }
@@ -80,6 +80,42 @@ class UpdateQuestionsTest extends TestCase
         $this->assertEquals('new title', $question->title);
         $this->assertEquals(1, $question->submittable->minimum);
         $this->assertEquals(10, $question->submittable->maximum);
+    }
+
+    /** @test */
+    public function author_can_change_question_type()
+    {
+        $this->withoutExceptionHandling();
+        $question = $this->createQuestion(MultipleChoiceSubmittable::class);
+        $question->addOptions($this->options());
+        $this->get(route('questions.types.create', [
+            'question' => $question,
+            'submittable_type' => 'open_submittable'
+        ]))->assertViewIs('types.create')->assertSee($question->title);
+
+        $this->post(route('questions.types.store', [
+            'question' => $question,
+            'submittable_type' => 'open_submittable'
+        ]))->assertStatus(200);
+
+        //     $this->get(route('questions.types.create', [
+    //         'question' => $question,
+    //         'submittable_type' => 'scale_submittable'
+    //     ]))->assertViewIs('types.create')
+    //         ->assertSee('Minimum')
+    //         ->assertSee('Maximum');
+    }
+
+
+
+
+    protected function options()
+    {
+        return [
+            new Option(['text' => 'foo']),
+            new Option(['text' => 'bar']),
+            new Option(['text' => 'baz']),
+        ];
     }
 
     protected function viewEditForm($question)
