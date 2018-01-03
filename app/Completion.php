@@ -8,7 +8,7 @@ class Completion extends Model
 {
     protected $guarded = [];
 
-    protected $with = ['answers', 'participant'];
+    protected $with = ['answers', 'survey'];
 
     public function survey()
     {
@@ -25,30 +25,14 @@ class Completion extends Model
         return $this->hasMany(Answer::class);
     }
 
-    public function addAnswer($attributes)
+    public function addAnswers(array $answersAttributes)
     {
-        return $this->answers()->create($attributes);
-    }
-
-    public function addAnswers($answerAttributeArray)
-    {
-        $answers = $this->buildAnswers($answerAttributeArray);
-        return $this->answers()->saveMany($answers);
-    }
-
-    public function buildAnswers($answerAttributeArray)
-    {
-        return collect($answerAttributeArray)->map(function ($answerAttributes) {
-            return new Answer(array_intersect_key(
-                $answerAttributes,
-                array_flip(['question_id', 'text'])
-            ));
+        $answers = collect($answersAttributes)->map(function ($answerAttributes) {
+            return  new Answer([
+                'question_id' => $answerAttributes['question_id'],
+                'text' => $answerAttributes['text']
+            ]);
         });
-    }
-
-    public function buildAnswersFromQuestions()
-    {
-        $answerAttributeArray =  $this->survey->questions->map->buildAnswerAttributes();
-        return $this->buildAnswers($answerAttributeArray);
+        return $this->answers()->saveMany($answers);
     }
 }

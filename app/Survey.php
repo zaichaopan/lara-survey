@@ -20,10 +20,10 @@ class Survey extends Model
         return $this->hasMany(Question::class);
     }
 
-    // public function completions()
-    // {
-    //     return $this->hasMany(Completion::class);
-    // }
+    public function completions()
+    {
+        return $this->hasMany(Completion::class);
+    }
 
     public function addQuestion(array $attributes)
     {
@@ -33,10 +33,8 @@ class Survey extends Model
         return $question;
     }
 
-    // public function completedBy(User $user)
-    // {
-    //     return $this->completions()->create([
-    //         'user_id' => $user->id
-    //     ]);
-    // }
+    public function completedBy(User $user)
+    {
+        return $this->completions()->create(['user_id' => $user->id]);
+    }
 }

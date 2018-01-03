@@ -9,14 +9,19 @@ use Illuminate\Http\Request;
 
 class CompletionsController extends Controller
 {
-    public function show(Completion $completion)
+    public function __construct()
     {
-        return view('completions.show', compact('completion'));
+        $this->middleware('auth');
     }
 
     public function store(Survey $survey)
     {
-        $completion = $survey->completedBy(auth()->user());
-        $completion->addAnswers(request('answers'));
+        $completion = $survey->completeBy(auth()->user())->addAnswers(request('answersAttributes'));
+        return redirect(route('completions.show', ['completion' => $completion]));
+    }
+
+    public function show(Completion $completion)
+    {
+        return view('completions.show', compact('completion'));
     }
 }
