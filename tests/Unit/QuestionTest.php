@@ -129,7 +129,7 @@ class QuestionTest extends TestCase
      }
 
      /** @test */
-     public function it_can_swith_type()
+     public function it_can_switch_type()
      {
         $question = $this->createQuestion(MultipleChoiceSubmittable::class);
         
