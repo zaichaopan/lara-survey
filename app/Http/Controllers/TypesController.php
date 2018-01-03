@@ -8,6 +8,11 @@ use Illuminate\Validation\Rule;
 
 class TypesController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:update,question');
+    }
+
     public function create(Question $question)
     {
         $submittableType = request('submittable_type');

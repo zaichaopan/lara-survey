@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Option;
+use App\Question;
 use Tests\TestCase;
 use App\OpenSubmittable;
 use App\ScaleSubmittable;
@@ -14,7 +15,7 @@ class UpdateQuestionsTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function non_author_cannot_see_edit_questions()
+    public function non_author_cannot_update_questions()
     {
         $john = factory('App\User')->create();
         $survey = factory('App\Survey')->create(['user_id' => $john]);
@@ -23,12 +24,23 @@ class UpdateQuestionsTest extends TestCase
 
         $this->viewEditForm($question)->assertRedirect('login');
 
+        $this->viewChangeTypeForm(
+            $question,
+            array_random(Question::SUBMITTABLE_TYPES)
+        )->assertRedirect('login');
+
         // redirect because of unauthenticated
         $this->updateQuestion($question, [])->assertStatus(302);
+        $this->changeType($question, [])->assertStatus(302);
 
         $this->login($jane);
         $this->viewEditForm($question)->assertStatus(403);
         $this->updateQuestion($question, [])->assertStatus(403);
+        $this->viewChangeTypeForm(
+            $question,
+            array_random(Question::SUBMITTABLE_TYPES)
+        )->assertStatus(403);
+        $this->changeType($question, [])->assertStatus(403);
     }
 
     /** @test */
@@ -140,7 +152,7 @@ class UpdateQuestionsTest extends TestCase
         return $this->get(route('questions.types.create', [
             'question' => $question,
             'submittable_type' => $submittableType
-        ]))->assertViewIs('types.create')->assertSee($question->title);
+        ]));
     }
 
     protected function changeType($question, $data)
