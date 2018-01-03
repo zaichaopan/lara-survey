@@ -13,9 +13,7 @@ class UserTest extends TestCase
     public function it_can_add_survey()
     {
         $user = factory('App\User')->create();
-        $user->addSurvey([
-            'title' => 'Foo'
-        ]);
-        $this->assertTrue($user->surveys->contains('author_id', $user->id));
+        $user->addSurvey(['title' => 'Foo']);
+        $this->assertTrue($user->surveys->contains('user_id', $user->id));
     }
 }

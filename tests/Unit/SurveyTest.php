@@ -66,6 +66,7 @@ class SurveyTest extends TestCase
         $this->assertTrue($this->survey->questions->contains($question));
     }
 
+    /** @test */
     public function it_can_be_completed()
     {
         $user = factory('App\User')->create();
