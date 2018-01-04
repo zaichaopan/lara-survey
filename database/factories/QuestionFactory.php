@@ -17,21 +17,27 @@ $factory->define(App\Question::class, function (Faker $faker) {
 
 $factory->state(App\Question::class, 'multiple_choice', function ($faker) {
     return [
-        'submittable_id' => MultipleChoiceSubmittable::create()->id,
+        'submittable_id' => function () {
+            return factory('App\MultipleChoiceSubmittable')->create()->id;
+        },
         'submittable_type' => 'App\MultipleChoiceSubmittable'
     ];
 });
 
 $factory->state(App\Question::class, 'open', function ($faker) {
     return [
-        'submittable_id' => OpenSubmittable::create()->id,
+        'submittable_id' => function () {
+            return factory('App\OpenSubmittable')->create()->id;
+        },
         'submittable_type' => 'App\OpenSubmittable'
     ];
 });
 
 $factory->state(App\Question::class, 'scale', function ($faker) {
     return [
-        'submittable_id' => ScaleSubmittable::create()->id,
+        'submittable_id' => function () {
+            return factory('App\ScaleSubmittable')->create()->id;
+        },
         'submittable_type' => 'App\ScaleSubmittable'
     ];
 });

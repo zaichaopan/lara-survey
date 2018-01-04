@@ -46,10 +46,9 @@ class UpdateQuestionsTest extends TestCase
     /** @test */
     public function author_can_update_multiple_choice_question()
     {
-        $question = $this->createQuestion(MultipleChoiceSubmittable::class);
-
-        $question->addOptions($this->options());
-
+        $this->login();
+        $survey = factory('App\Survey')->create(['user_id' => auth()->id()]);
+        $question = createMultipleChoiceQuestion($survey);
         $this->updateQuestion($question, [
             'title' => 'new title',
             'submittable_type' => 'multiple_choice_submittable',
@@ -66,7 +65,9 @@ class UpdateQuestionsTest extends TestCase
     /** @test */
     public function author_can_update_open_questions()
     {
-        $question = $this->createQuestion(OpenSubmittable::class);
+        $this->login();
+        $survey = factory('App\Survey')->create(['user_id' => auth()->id()]);
+        $question = factory('App\Question')->states('open')->create(['survey_id' => $survey->id]);
         $this->updateQuestion($question, [
             'title' => 'new title',
             'submittable_type' => 'open_submittable',
@@ -77,7 +78,13 @@ class UpdateQuestionsTest extends TestCase
     /** @test */
     public function author_can_update_scale_questions()
     {
-        $question = $this->createQuestion(ScaleSubmittable::class);
+        $this->login();
+        $survey = factory('App\Survey')->create(['user_id' => auth()->id()]);
+        $scaleSubmittable = factory('App\ScaleSubmittable')->create(['minimum' => 1, 'maximum' => 5]);
+        $question = factory('App\Question')->states('scale')->create([
+            'submittable_id' => $scaleSubmittable->id,
+            'survey_id' => $survey->id
+        ]);
         $this->updateQuestion($question, [
             'title' => 'new title',
             'submittable_type' => 'scale_submittable',
@@ -93,8 +100,10 @@ class UpdateQuestionsTest extends TestCase
     /** @test */
     public function author_can_change_question_type()
     {
-        $question = $this->createQuestion(MultipleChoiceSubmittable::class);
-        $question->addOptions($this->options());
+        $this->login();
+        $survey = factory('App\Survey')->create(['user_id' => auth()->id()]);
+        $question = createMultipleChoiceQuestion($survey);
+
         $this->viewChangeTypeForm($question, 'open_submittable');
         $this->changeType($question, ['submittable_type' => 'open_submittable']);
         $this->assertInstanceOf(OpenSubmittable::class, $question->fresh()->submittable);
@@ -124,15 +133,6 @@ class UpdateQuestionsTest extends TestCase
         $this->assertEquals(['foo', 'bar', 'baz'], $question->options->pluck('text')->all());
     }
 
-    protected function options()
-    {
-        return [
-            new Option(['text' => 'foo']),
-            new Option(['text' => 'bar']),
-            new Option(['text' => 'baz']),
-        ];
-    }
-
     protected function viewEditForm($question)
     {
         return $this->get(route('surveys.questions.edit', [
@@ -158,16 +158,5 @@ class UpdateQuestionsTest extends TestCase
     protected function changeType($question, $data)
     {
         return $this->post(route('questions.types.store', ['question' => $question]), $data);
-    }
-
-    protected function createQuestion($submittableClass)
-    {
-        $this->login();
-        $survey = factory('App\Survey')->create(['user_id' => auth()->id()]);
-        $question = factory('App\Question')->create(['survey_id' => $survey->id]);
-        $submittable = new $submittableClass;
-        $submittable->save();
-        $question = $question->associateType($submittable);
-        return $question;
     }
 }

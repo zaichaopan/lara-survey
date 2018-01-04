@@ -2,14 +2,12 @@
 
 namespace Tests\Unit;
 
-use App\Answer;
-use App\Option;
 use App\Question;
-use App\SubmitType;
 use Tests\TestCase;
 use App\OpenSubmittable;
 use App\ScaleSubmittable;
 use App\MultipleChoiceSubmittable;
+use App\Exceptions\InvalidAnswerException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class SurveyTest extends TestCase
@@ -32,7 +30,7 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_has_questions()
     {
-        $question = $this->addQuestion(['submittable_type' => 'open_submittable']);
+        $question = factory('App\Question')->create(['survey_id' => $this->survey->id]);
         $this->assertTrue($this->survey->questions->contains($question));
     }
 
@@ -71,89 +69,65 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_throws_exception_if_a_unknown_question_found_during_building_answers()
     {
-        $question = $this->createQuestion(
-            MultipleChoiceSubmittable::class,
-            ['survey_id' => $this->survey->id]
-        );
-
+        $question = factory('App\Question')->create(['survey_id' => $this->survey->id]);
         $attributes = [['question_id' => 100 ] ];
-        $this->expectException(\Exception::class);
+        $this->expectException(InvalidAnswerException::class);
         $this->survey->buildAnswers($attributes);
     }
 
     /** @test */
     public function it_throws_exception_if_invalid_text_found_during_building_answer_for_multiple_choice_question()
     {
-        $question = $this->createQuestion(
-            MultipleChoiceSubmittable::class,
-            ['survey_id' => $this->survey->id]
-        );
-
-        $question->addOptions([new Option(['text' => 'foo'])]);
-        $attributes = [['question_id' => $question->id,'text' => 'foobar']];
-        $this->expectException(\Exception::class);
+        $multipleChoiceQuestion = createMultipleChoiceQuestion($this->survey);
+        $this->assertFalse(in_array('foobar', $multipleChoiceQuestion->options->pluck('text')->all()));
+        $attributes = [['question_id' => $multipleChoiceQuestion->id,'text' => 'foobar']];
+        $this->expectException(InvalidAnswerException::class);
         $this->survey->buildAnswers($attributes);
     }
 
     /** @test */
     public function it_throws_exception_if_invalid_text_found_during_building_answer_for_scale_question()
     {
-        $question = $this->createQuestion(
-            ScaleSubmittable::class,
-            ['survey_id' => $this->survey->id]
-        );
-        $question->submittable->update(['minimum' => 1,'maximum' => 10]);
-        $attributes = [['question_id' => $question->id,'text' => '11']];
-        $this->expectException(\Exception::class);
+        $scaleSumittable = factory('App\ScaleSubmittable')->create(['minimum' => 0, 'maximum' => 5 ]);
+        $scaleQuestion = factory('App\Question')->states('scale')->create([
+            'survey_id' => $this->survey->id,
+            'submittable_id' => $scaleSumittable->id
+        ]);
+        $attributes = [['question_id' => $scaleQuestion->id,'text' => '11']];
+        $this->expectException(InvalidAnswerException::class);
         $this->survey->buildAnswers($attributes);
     }
 
     /** @test */
     public function it_can_build_answers()
     {
-        $scaleQuestion = $this->createQuestion(
-            ScaleSubmittable::class,
-            ['survey_id' => $this->survey->id
-        ]
-        );
-
-        $scaleQuestion->submittable->update(['minimum' => 1, 'maximum' => 10]);
-
-        $multipleChoiceQuestion = $this->createQuestion(
-            MultipleChoiceSubmittable::class,
-            ['survey_id' => $this->survey->id]
-        );
-
-        $multipleChoiceQuestion->addOptions([new Option(['text' => 'foo'])]);
-
-        $openQuestion = $this->createQuestion(
-            OpenSubmittable::class,
-            ['survey_id' => $this->survey->id]
-        );
+        $scaleSumittable = factory('App\ScaleSubmittable')->create(['minimum' => 0, 'maximum' => 5 ]);
+        $scaleQuestion = factory('App\Question')->states('scale')->create([
+            'survey_id' => $this->survey->id,
+            'submittable_id' => $scaleSumittable->id
+        ]);
+        $multipleChoiceQuestion = createMultipleChoiceQuestion($this->survey);
+        $openQuestion = factory('App\Question')->states('open')->create(['survey_id' => $this->survey->id]);
 
         $attributes = [
            ['question_id' => $scaleQuestion->id,'text' => 5],
-           ['question_id' => $multipleChoiceQuestion->id,'text' => 'foo'],
-           ['question_id' => $openQuestion->id,'text' => 'foobar'],
+           ['question_id' => $multipleChoiceQuestion->id,'text' => $multipleChoiceQuestion->options->first()->text],
+           ['question_id' => $openQuestion->id,'text' => 'foobar']
         ];
-
         $answers = $this->survey->fresh()->buildAnswers($attributes);
+
         $this->assertCount(3, $answers);
     }
 
     /** @test */
     public function it_can_be_completed()
     {
-        $question = $this->createQuestion(
-            MultipleChoiceSubmittable::class,
-            ['survey_id' => $this->survey->id]
-        );
-        $question->addOptions([new Option(['text' => 'foo'])]);
         $user = factory('App\User')->create();
+        $question = createMultipleChoiceQuestion($this->survey);
         $completion = $this->survey->completeBy($user, [
             [
                 'question_id' => $question->id,
-                'text' => 'foo'
+                'text' => $question->options->first()->text
             ]
         ]);
         $this->assertTrue($this->survey->completions->contains($completion->id));
@@ -167,20 +141,7 @@ class SurveyTest extends TestCase
 
     protected function addQuestion($overrides)
     {
-        $data = [
-            'title' =>  'foo',
-            'submittable_type' => array_random(Question::SUBMITTABLE_TYPES)
-        ];
-
+        $data = ['title' =>  'foo','submittable_type' => array_random(Question::SUBMITTABLE_TYPES)];
         return $this->survey->addQuestion(array_merge($data, $overrides));
-    }
-
-    protected function createQuestion($submittableClass, $data = [])
-    {
-        $question = factory('App\Question')->create($data);
-        $submittable = new $submittableClass;
-        $submittable->save();
-        $question = $question->associateType($submittable);
-        return $question;
     }
 }

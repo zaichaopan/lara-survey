@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\MultipleChoiceSubmittable;
 use App\Option;
-use App\ScaleSubmittable;
+use Tests\TestCase;
 use App\OpenSubmittable;
+use App\ScaleSubmittable;
+use App\MultipleChoiceSubmittable;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CompleteSurveysTest extends TestCase
 {
@@ -44,8 +44,7 @@ class CompleteSurveysTest extends TestCase
     {
         $this->login();
         $completion = factory('App\Completion')->create();
-
-        $response = $this->postAnswers($completion->survey, [
+        $this->postAnswers($completion->survey, [
             'answers_attributes' => [
                 [
                     'question_id' => null,
@@ -73,9 +72,8 @@ class CompleteSurveysTest extends TestCase
     public function can_not_answer_questions_in_other_surveys()
     {
         $this->login();
-        $survey = factory('App\Survey')->create();
-        factory('App\Question')->create(['survey_id' => $survey->id]);
-        $this->postAnswers($survey, [
+        $question = factory('App\Question')->create();
+        $this->postAnswers($question->survey, [
             'answers_attributes' => [
                 ['question_id' => 100],
              ]
@@ -86,21 +84,14 @@ class CompleteSurveysTest extends TestCase
     public function multiple_choice_question_answer_must_exist_in_its_options()
     {
         $this->login();
-        $survey = factory('App\Survey')->create();
-        $question = $this->createQuestion(MultipleChoiceSubmittable::class, [
-            'survey_id' => $survey->id
-        ]);
-
-        $question->addOptions([
-            new Option(['text' => 'foo']),
-            new Option(['text' => 'bar'])
-        ]);
-
-        $this->postAnswers($survey, [
+        $question = createMultipleChoiceQuestion();
+        $invalidAnswerText = 'foobar';
+        $this->assertFalse(in_array($invalidAnswerText, $question->options->pluck('text')->all()));
+        $this->postAnswers($question->survey, [
             'answers_attributes' => [
                 [
                     'question_id' => $question->id,
-                    'text' => 'foobar',
+                    'text' => $invalidAnswerText,
                 ]
              ]
         ])->assertSessionHas('message', 'Oops! Something went wrong!');
@@ -110,10 +101,11 @@ class CompleteSurveysTest extends TestCase
     public function scale_question_answer_must_between_min_and_max()
     {
         $this->login();
-        $survey = factory('App\Survey')->create();
-        $question = $this->createQuestion(ScaleSubmittable::class, [ 'survey_id' => $survey->id ]);
-        $question->fresh()->submittable->update(['minimum' => 1, 'maximum' => 10]);
-        $this->postAnswers($survey, [
+        $scaleSubmittable = factory('App\ScaleSubmittable')->create(['minimum' => 1, 'maximum' => 5]);
+        $question = factory('App\Question')->states('scale')->create([
+            'submittable_id' => $scaleSubmittable->id
+        ]);
+        $this->postAnswers($question->survey, [
             'answers_attributes' => [
                 [
                     'question_id' => $question->id,
@@ -128,28 +120,19 @@ class CompleteSurveysTest extends TestCase
     {
         $this->login();
         $survey = factory('App\Survey')->create();
-
-        $multipleChoiceQuestion = $this->createQuestion(MultipleChoiceSubmittable::class, ['survey_id' => $survey->id]);
-
-        $multipleChoiceQuestion->addOptions([
-            new Option(['text' => 'foo']),
-            new Option(['text' => 'bar'])
-        ]);
-
-        $scaleQuestion = $this->createQuestion(ScaleSubmittable::class, ['survey_id' => $survey->id]);
-        $scaleQuestion->fresh()->submittable->update(['minimum' => 1, 'maximum' => 10]);
-
-        $openQuestion = $this->createQuestion(OpenSubmittable::class, ['survey_id' => $survey->id]);
+        $multipleChoiceQuestion = createMultipleChoiceQuestion($survey);
+        $scaleQuestion = factory('App\Question')->states('scale')->create(['survey_id' => $survey->id]);
+        $openQuestion = factory('App\Question')->states('open')->create(['survey_id' => $survey->id]);
 
         $this->postAnswers($survey, [
             'answers_attributes' => [
                 [
                     'question_id' => $multipleChoiceQuestion->id,
-                    'text' => 'foo',
+                    'text' => $multipleChoiceQuestion->options->first()->text,
                 ],
                 [
                     'question_id' => $scaleQuestion->id,
-                    'text' => '5',
+                    'text' => $scaleQuestion->submittable->maximum,
                 ],
                 [
                     'question_id' => $openQuestion->id,
@@ -167,21 +150,12 @@ class CompleteSurveysTest extends TestCase
             $multipleChoiceQuestion->id, $scaleQuestion->id, $openQuestion->id
         ], $answers->pluck('question_id')->all());
         $this->assertEquals([
-            'foo', '5', 'foobar'
+            $multipleChoiceQuestion->options->first()->text, $scaleQuestion->submittable->maximum, 'foobar'
         ], $answers->pluck('text')->all());
     }
 
     protected function postAnswers($survey, $data)
     {
         return $this->post(route('surveys.completions.store', ['survey' => $survey]), $data);
-    }
-
-    protected function createQuestion($submittableClass, $data = [])
-    {
-        $question = factory('App\Question')->create($data);
-        $submittable = new $submittableClass;
-        $submittable->save();
-        $question = $question->associateType($submittable);
-        return $question;
     }
 }
