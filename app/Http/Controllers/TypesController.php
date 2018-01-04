@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Question;
-use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class TypesController extends Controller
@@ -24,10 +23,7 @@ class TypesController extends Controller
     public function store(Question $question)
     {
         $question->switchType($this->questionAttributes());
-
-        return redirect(route('surveys.show', [
-            'survey' => $question->survey
-        ]));
+        return redirect(route('surveys.show', ['survey' => $question->survey ]));
     }
 
     protected function questionAttributes()

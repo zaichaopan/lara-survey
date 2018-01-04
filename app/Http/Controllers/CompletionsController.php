@@ -34,6 +34,7 @@ class CompletionsController extends Controller
     protected function answersAttributes($survey)
     {
         $size = count($survey->questions);
+
         request()->validate([
             'answers_attributes' => 'required|size:' . $size,
             'answers_attributes.*.question_id' => 'required|integer',

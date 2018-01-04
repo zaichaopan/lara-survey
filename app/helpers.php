@@ -10,6 +10,7 @@ function optional_method($obj)
 function throw_exception_unless($result, $exceptionClass = null)
 {
     $exceptionClass = $exceptionClass ?? \Exception::class;
+
     if (!$result) {
         throw new $exceptionClass;
     }
