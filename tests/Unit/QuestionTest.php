@@ -113,7 +113,7 @@ class QuestionTest extends TestCase
             new Option(['text' => 'bar']),
             new Option(['text' => 'baz']),
         ]);
-       
+
         $this->assertCount(3, $question->fresh()->options);
         $question->deleteOptions();
         $this->assertCount(0, $question->fresh()->options);
@@ -126,19 +126,19 @@ class QuestionTest extends TestCase
         $this->dissociateType(MultipleChoiceSubmittable::class);
         $this->dissociateType(OpenSubmittable::class);
         $this->dissociateType(ScaleSubmittable::class);
-     }
+    }
 
-     /** @test */
-     public function it_can_switch_type()
-     {
+    /** @test */
+    public function it_can_switch_type()
+    {
         $question = $this->createQuestion(MultipleChoiceSubmittable::class);
-        
+
         $question->addOptions([
             new Option(['text' => 'foo']),
             new Option(['text' => 'bar']),
             new Option(['text' => 'baz']),
         ]);
-        
+
         $question->switchType(['submittable_type' => 'open_submittable']);
         $question = $question->fresh();
         $this->assertInstanceOf(OpenSubmittable::class, $question->submittable);
@@ -159,11 +159,21 @@ class QuestionTest extends TestCase
             'options' => ['foo', 'bar', 'baz']
         ]);
         $question = $question->fresh();
-        $this->assertInstanceOf(MultipleChoiceSubmittable::class, $question->submittable);        
+        $this->assertInstanceOf(MultipleChoiceSubmittable::class, $question->submittable);
         $this->assertEquals([
             'foo', 'bar', 'baz'
         ], $question->options->pluck('text')->all());
-     }
+    }
+
+    /** @test */
+    public function it_can_find_option_by_text()
+    {
+        $question = $this->createQuestion(MultipleChoiceSubmittable::class);
+        $question->addOptions([new Option(['text' => 'foo'])]);
+        $question = $question->fresh();
+        $this->assertNotNull($question->findOptionByText('foo'));
+        $this->assertNull($question->findOptionByText('foobar'));
+    }
 
     protected function createQuestion($submittableClass)
     {
@@ -180,6 +190,6 @@ class QuestionTest extends TestCase
         $question = $question->fresh();
         $this->assertInstanceOf($submittableTypeClass, $question->submittable);
         $question->dissociateType();
-        $this->assertNull($question->submittable);  
+        $this->assertNull($question->submittable);
     }
 }

@@ -25,14 +25,8 @@ class Completion extends Model
         return $this->hasMany(Answer::class);
     }
 
-    public function addAnswers(array $answersAttributes)
+    public function addAnswers($answers)
     {
-        $answers = collect($answersAttributes)->map(function ($answerAttributes) {
-            return  new Answer([
-                'question_id' => $answerAttributes['question_id'],
-                'text' => $answerAttributes['text']
-            ]);
-        });
         return $this->answers()->saveMany($answers);
     }
 }

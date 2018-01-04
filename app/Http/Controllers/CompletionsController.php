@@ -16,12 +16,23 @@ class CompletionsController extends Controller
 
     public function store(Survey $survey)
     {
-        $completion = $survey->completeBy(auth()->user())->addAnswers(request('answersAttributes'));
+        $user = auth()->user();
+        abort_if($user->hasCompleted($survey), 400);
+        $completion = $survey->completeBy($user, $this->answersAttributes());
         return redirect(route('completions.show', ['completion' => $completion]));
     }
 
     public function show(Completion $completion)
     {
         return view('completions.show', compact('completion'));
+    }
+
+    protected function answersAttributes()
+    {
+        return request()->validate([
+            'answers_attributes' => 'required',
+            'answers_attributes.*.question_id' => 'required|integer',
+            'answers_attributes.*.text' => 'nullable'
+        ]);
     }
 }

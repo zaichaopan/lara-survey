@@ -31,6 +31,11 @@ class Question extends Model
         return $this->hasMany(Option::class);
     }
 
+    public function answers()
+    {
+        return $this->hasMany(Answer::class);
+    }
+
     public function submittableType()
     {
         return  $this->submittable_type
@@ -87,5 +92,10 @@ class Question extends Model
             $question->submittable()->dissociate($submittable)->save();
             $submittable->delete();
         });
+    }
+
+    public function findOptionByText($text)
+    {
+        return $this->options->firstWhere('text', $text);
     }
 }

@@ -16,4 +16,5 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::resource('surveys', 'SurveysController', ['only' => ['create', 'show', 'store']]);
 Route::resource('surveys.questions', 'QuestionsController', ['only' => ['create', 'edit', 'store', 'update']]);
 Route::resource('questions.types', 'TypesController', ['only' => ['create','store']]);
+Route::resource('surveys.completions', 'CompletionsController', ['only' => ['show', 'store']]);
 Auth::routes();

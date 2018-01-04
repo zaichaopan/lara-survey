@@ -26,4 +26,11 @@ class ScaleSubmittable extends Model
         $this->maximum =  $questionAttributes['maximum'];
         return tap($this)->save();
     }
+
+    public function validAnswer($text)
+    {
+        throw_exception_unless($this->minimum <= $text && $text <= $this->maximum);
+
+        return true;
+    }
 }

@@ -33,8 +33,23 @@ class Survey extends Model
         return $question;
     }
 
-    public function completedBy(User $user)
+    public function buildAnswers(array $attributes)
     {
-        return $this->completions()->create(['user_id' => $user->id]);
+        $questions = $this->questions;
+
+        return collect($attributes)->map(function ($item) use ($questions) {
+            $questionId = $item['question_id'];
+            $text =  $item['text'];
+            throw_exception_unless($question = $questions->firstWhere('id', $questionId));
+            optional_method($question->submittable)->validAnswer($text);
+            return new Answer(['question_id' => $questionId,'text' => $text]);
+        });
+    }
+
+    public function completeBy(User $user, array $answersAttributes)
+    {
+        $completion =  $this->completions()->create(['user_id' => $user->id]);
+        $completion->addAnswers($this->buildAnswers($answersAttributes));
+        return $completion;
     }
 }

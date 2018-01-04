@@ -32,8 +32,18 @@ class User extends Authenticatable
         return $this->hasMany(Survey::class);
     }
 
+    public function completions()
+    {
+        return $this->hasMany(Completion::class);
+    }
+
     public function addSurvey($attributes)
     {
         return $this->surveys()->create($attributes);
+    }
+
+    public function hasCompleted(Survey $survey)
+    {
+        return $this->completions()->where('survey_id', $survey->id)->exists();
     }
 }

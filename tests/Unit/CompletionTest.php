@@ -30,25 +30,15 @@ class CompletionTest extends TestCase
     public function it_can_add_answers()
     {
         $completion = factory('App\Completion')->create();
-        $answers = $completion->addAnswers($this->answersAttributes());
+        $answers = $completion->addAnswers($this->answers());
         $this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $completion->answers);
-        $this->assertEquals(
-            $this->answersAttributes(),
-            $completion->answers()->select('question_id', 'text')->get()->toArray()
-        );
     }
 
-    protected function answersAttributes()
+    protected function answers()
     {
         return [
-            [
-                'question_id' => 1,
-                'text' => 'foo'
-            ],
-            [
-                'question_id' => 2,
-                'text' => 'bar'
-            ]
+            new Answer(['question_id' => 1,'text' => 'foo']),
+            new Answer(['question_id' => 2,'text' => 'bar'])
        ];
     }
 }

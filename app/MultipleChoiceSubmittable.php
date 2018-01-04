@@ -44,4 +44,10 @@ class MultipleChoiceSubmittable extends Model
     {
         $this->question->deleteOptions();
     }
+
+    public function validAnswer($text)
+    {
+        throw_exception_unless($this->question->findOptionByText($text));
+        return true;
+    }
 }
