@@ -82,7 +82,7 @@ class SurveyTest extends TestCase
     }
 
     /** @test */
-    public function it_throws_exception_if_invalid_text_found_durinng_building_answer_for_multiple_choice_question()
+    public function it_throws_exception_if_invalid_text_found_during_building_answer_for_multiple_choice_question()
     {
         $question = $this->createQuestion(
             MultipleChoiceSubmittable::class,
@@ -96,7 +96,7 @@ class SurveyTest extends TestCase
     }
 
     /** @test */
-    public function it_thows_exception_if_invalid_text_found_during_buidling_answer_for_scale_question()
+    public function it_throws_exception_if_invalid_text_found_during_building_answer_for_scale_question()
     {
         $question = $this->createQuestion(
             ScaleSubmittable::class,
@@ -119,7 +119,7 @@ class SurveyTest extends TestCase
 
         $scaleQuestion->submittable->update(['minimum' => 1, 'maximum' => 10]);
 
-        $multipleChoiceQuestion = $this->createquestion(
+        $multipleChoiceQuestion = $this->createQuestion(
             MultipleChoiceSubmittable::class,
             ['survey_id' => $this->survey->id]
         );

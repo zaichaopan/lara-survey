@@ -60,29 +60,29 @@ class QuestionTest extends TestCase
             new Option(['text' => 'bar']),
             new Option(['text' => 'baz']),
         ]);
-        $newQuetionAttributes = [
+        $newQuestionAttributes = [
             'title' => 'new title',
             'options' => ['new foo', 'new bar', 'new baz']
         ];
-        $multipleChoiceQuestion = $multipleChoiceQuestion->updateAttributes($newQuetionAttributes);
+        $multipleChoiceQuestion = $multipleChoiceQuestion->updateAttributes($newQuestionAttributes);
         $this->assertEquals('new title', $multipleChoiceQuestion->title);
         $this->assertEquals(['new foo', 'new bar', 'new baz'], $multipleChoiceQuestion->options->pluck('text')->all());
 
         $scaleQuestion = $this->createQuestion(ScaleSubmittable::class);
-        $newQuetionAttributes = ['title' => 'new title', 'minimum' => 1, 'maximum' => 10 ];
-        $scaleQuestion = $scaleQuestion->updateAttributes($newQuetionAttributes);
+        $newQuestionAttributes = ['title' => 'new title', 'minimum' => 1, 'maximum' => 10 ];
+        $scaleQuestion = $scaleQuestion->updateAttributes($newQuestionAttributes);
         $this->assertEquals('new title', $scaleQuestion->title);
         $this->assertEquals(1, $scaleQuestion->submittable->minimum);
         $this->assertEquals(10, $scaleQuestion->submittable->maximum);
 
         $openQuestion = $this->createQuestion(OpenSubmittable::class);
-        $newQuetionAttributes = ['title' => 'new title',];
-        $openQuestion = $openQuestion->updateAttributes($newQuetionAttributes);
+        $newQuestionAttributes = ['title' => 'new title',];
+        $openQuestion = $openQuestion->updateAttributes($newQuestionAttributes);
         $this->assertEquals('new title', $openQuestion->title);
     }
 
     /** @test */
-    public function it_can_build_attrubtes_for_a_submittable_type()
+    public function it_can_build_attributes_for_a_submittable_type()
     {
         $multipleChoiceQuestion = new Question;
         $multipleChoiceQuestion = $multipleChoiceQuestion->buildAttributes('multiple_choice_submittable');

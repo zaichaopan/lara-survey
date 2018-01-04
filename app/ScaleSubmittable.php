@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Exceptions\InvalidAnswerException;
 
 class ScaleSubmittable extends Model
 {
@@ -29,7 +30,10 @@ class ScaleSubmittable extends Model
 
     public function validAnswer($text)
     {
-        throw_exception_unless($this->minimum <= $text && $text <= $this->maximum);
+        throw_exception_unless(
+            $this->minimum <= $text && $text <= $this->maximum,
+            InvalidAnswerException::class
+        );
 
         return true;
     }

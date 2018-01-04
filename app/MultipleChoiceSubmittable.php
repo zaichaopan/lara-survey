@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Exceptions\InvalidAnswerException;
 
 class MultipleChoiceSubmittable extends Model
 {
@@ -15,7 +16,7 @@ class MultipleChoiceSubmittable extends Model
 
     public function buildQuestion(Question $question, array $questionAttributes)
     {
-        $options  = collect($questionAttributes['options'])->map(function ($optionAttribute) {
+        $options = collect($questionAttributes['options'])->map(function ($optionAttribute) {
             return new Option(['text' => $optionAttribute]);
         });
 
@@ -44,10 +45,10 @@ class MultipleChoiceSubmittable extends Model
     {
         $this->question->deleteOptions();
     }
-
+   
     public function validAnswer($text)
     {
-        throw_exception_unless($this->question->findOptionByText($text));
+        throw_exception_unless($this->question->findOptionByText($text), InvalidAnswerException::class);
         return true;
     }
 }

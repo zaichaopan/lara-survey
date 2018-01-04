@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Exceptions\InvalidAnswerException;
 
 class Survey extends Model
 {
@@ -39,8 +40,8 @@ class Survey extends Model
 
         return collect($attributes)->map(function ($item) use ($questions) {
             $questionId = $item['question_id'];
-            $text =  $item['text'];
-            throw_exception_unless($question = $questions->firstWhere('id', $questionId));
+            $text =  isset($item['text']) ? $item['text'] : '';
+            throw_exception_unless($question = $questions->firstWhere('id', $questionId), InvalidAnswerException::class);
             optional_method($question->submittable)->validAnswer($text);
             return new Answer(['question_id' => $questionId,'text' => $text]);
         });

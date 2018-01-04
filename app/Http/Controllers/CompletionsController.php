@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Answer;
 use App\Survey;
 use App\Completion;
-use Illuminate\Http\Request;
+use App\Exceptions\InvalidAnswerException;
 
 class CompletionsController extends Controller
 {
@@ -16,9 +15,14 @@ class CompletionsController extends Controller
 
     public function store(Survey $survey)
     {
-        $user = auth()->user();
-        abort_if($user->hasCompleted($survey), 400);
-        $completion = $survey->completeBy($user, $this->answersAttributes());
+        abort_if(auth()->user()->hasCompleted($survey), 400);
+
+        try {
+            $completion = $survey->completeBy(auth()->user(), $this->answersAttributes($survey));
+        } catch (InvalidAnswerException $e) {
+            return back()->withInput()->with('message', 'Oops! Something went wrong!');
+        }
+
         return redirect(route('completions.show', ['completion' => $completion]));
     }
 
@@ -27,12 +31,15 @@ class CompletionsController extends Controller
         return view('completions.show', compact('completion'));
     }
 
-    protected function answersAttributes()
+    protected function answersAttributes($survey)
     {
-        return request()->validate([
-            'answers_attributes' => 'required',
+        $size = count($survey->questions);
+        request()->validate([
+            'answers_attributes' => 'required|size:' . $size,
             'answers_attributes.*.question_id' => 'required|integer',
             'answers_attributes.*.text' => 'nullable'
         ]);
+
+        return request('answers_attributes');
     }
 }
