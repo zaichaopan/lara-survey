@@ -16,13 +16,7 @@ class CompletionsController extends Controller
     public function store(Survey $survey)
     {
         abort_if(auth()->user()->hasCompleted($survey), 400);
-
-        try {
-            $completion = $survey->completeBy(auth()->user(), $this->answersAttributes($survey));
-        } catch (InvalidAnswerException $e) {
-            return back()->withInput()->with('message', 'Oops! Something went wrong!');
-        }
-
+        $completion = $survey->completeBy(auth()->user(), $this->answersAttributes($survey));
         return redirect(route('completions.show', ['completion' => $completion]));
     }
 

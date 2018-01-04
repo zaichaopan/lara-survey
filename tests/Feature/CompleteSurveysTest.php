@@ -79,7 +79,7 @@ class CompleteSurveysTest extends TestCase
             'answers_attributes' => [
                 ['question_id' => 100],
              ]
-        ])->assertSessionHas('message');
+        ])->assertSessionHas('message', 'Oops! Something went wrong!');
     }
 
     /** @test */
@@ -103,7 +103,7 @@ class CompleteSurveysTest extends TestCase
                     'text' => 'foobar',
                 ]
              ]
-        ])->assertSessionHas('message');
+        ])->assertSessionHas('message', 'Oops! Something went wrong!');
     }
 
     /** @test */
@@ -120,7 +120,7 @@ class CompleteSurveysTest extends TestCase
                     'text' => '11',
                 ]
              ]
-        ])->assertSessionHas('message');
+        ])->assertSessionHas('message', 'Oops! Something went wrong!');
     }
 
     /** @test */
@@ -162,7 +162,7 @@ class CompleteSurveysTest extends TestCase
         $this->assertTrue(auth()->user()->hasCompleted($survey));
         $this->assertCount(1, $survey->completions);
         $answers = $survey->completions[0]->answers;
-        $this->assertCount(3,$answers);
+        $this->assertCount(3, $answers);
         $this->assertEquals([
             $multipleChoiceQuestion->id, $scaleQuestion->id, $openQuestion->id
         ], $answers->pluck('question_id')->all());
@@ -176,7 +176,7 @@ class CompleteSurveysTest extends TestCase
         return $this->post(route('surveys.completions.store', ['survey' => $survey]), $data);
     }
 
-   protected function createQuestion($submittableClass, $data = [])
+    protected function createQuestion($submittableClass, $data = [])
     {
         $question = factory('App\Question')->create($data);
         $submittable = new $submittableClass;

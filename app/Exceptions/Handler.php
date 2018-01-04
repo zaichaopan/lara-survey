@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use App\Exceptions\InvalidAnswerException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
@@ -48,6 +49,10 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof InvalidAnswerException) {
+            return back()->withInput()->with('message', 'Oops! Something went wrong!');
+        }
+
         return parent::render($request, $exception);
     }
 }
