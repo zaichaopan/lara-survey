@@ -71,7 +71,11 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_throws_exception_if_a_unknown_question_found_during_building_answers()
     {
-        $question = $this->createQuestion(MultipleChoiceSubmittable::class, ['survey_id' => $this->survey->id]);
+        $question = $this->createQuestion(
+            MultipleChoiceSubmittable::class,
+            ['survey_id' => $this->survey->id]
+        );
+
         $attributes = [['question_id' => 100 ] ];
         $this->expectException(\Exception::class);
         $this->survey->buildAnswers($attributes);
@@ -80,7 +84,11 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_throws_exception_if_invalid_text_found_durinng_building_answer_for_multiple_choice_question()
     {
-        $question = $this->createQuestion(MultipleChoiceSubmittable::class, ['survey_id' => $this->survey->id]);
+        $question = $this->createQuestion(
+            MultipleChoiceSubmittable::class,
+            ['survey_id' => $this->survey->id]
+        );
+
         $question->addOptions([new Option(['text' => 'foo'])]);
         $attributes = [['question_id' => $question->id,'text' => 'foobar']];
         $this->expectException(\Exception::class);
@@ -90,7 +98,10 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_thows_exception_if_invalid_text_found_during_buidling_answer_for_scale_question()
     {
-        $question = $this->createQuestion(ScaleSubmittable::class, ['survey_id' => $this->survey->id]);
+        $question = $this->createQuestion(
+            ScaleSubmittable::class,
+            ['survey_id' => $this->survey->id]
+        );
         $question->submittable->update(['minimum' => 1,'maximum' => 10]);
         $attributes = [['question_id' => $question->id,'text' => '11']];
         $this->expectException(\Exception::class);
@@ -100,18 +111,30 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_can_build_answers()
     {
-        $scaleQuestion = $this->createQuestion(ScaleSubmittable::class, ['survey_id' => $this->survey->id]);
+        $scaleQuestion = $this->createQuestion(
+            ScaleSubmittable::class,
+            ['survey_id' => $this->survey->id
+        ]
+        );
+
         $scaleQuestion->submittable->update(['minimum' => 1, 'maximum' => 10]);
 
-        $multipleChoiceQuestion = $this->createquestion(MultipleChoiceSubmittable::class, ['survey_id' => $this->survey->id]);
+        $multipleChoiceQuestion = $this->createquestion(
+            MultipleChoiceSubmittable::class,
+            ['survey_id' => $this->survey->id]
+        );
+
         $multipleChoiceQuestion->addOptions([new Option(['text' => 'foo'])]);
 
-        $openQuestion = $this->createQuestion(OpenSubmittable::class, ['survey_id' => $this->survey->id]);
+        $openQuestion = $this->createQuestion(
+            OpenSubmittable::class,
+            ['survey_id' => $this->survey->id]
+        );
 
         $attributes = [
            ['question_id' => $scaleQuestion->id,'text' => 5],
            ['question_id' => $multipleChoiceQuestion->id,'text' => 'foo'],
-        ['question_id' => $openQuestion->id,'text' => 'foobar'],
+           ['question_id' => $openQuestion->id,'text' => 'foobar'],
         ];
 
         $answers = $this->survey->fresh()->buildAnswers($attributes);
@@ -121,7 +144,10 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_can_be_completed()
     {
-        $question = $this->createQuestion(MultipleChoiceSubmittable::class, ['survey_id' => $this->survey->id]);
+        $question = $this->createQuestion(
+            MultipleChoiceSubmittable::class,
+            ['survey_id' => $this->survey->id]
+        );
         $question->addOptions([new Option(['text' => 'foo'])]);
         $user = factory('App\User')->create();
         $completion = $this->survey->completeBy($user, [

@@ -23,17 +23,20 @@ class TypesController extends Controller
 
     public function store(Question $question)
     {
-        $questionAttributes = request()->validate([
+        $question->switchType($this->questionAttributes());
+
+        return redirect(route('surveys.show', [
+            'survey' => $question->survey
+        ]));
+    }
+
+    protected function questionAttributes()
+    {
+        return request()->validate([
             'submittable_type' => ['required', Rule::in(Question::SUBMITTABLE_TYPES)],
             'options' => 'options',
             'minimum' => 'minscale',
             'maximum' => 'maxscale'
         ]);
-
-        $question->switchType($questionAttributes);
-
-        return redirect(route('surveys.show', [
-            'survey' => $question->survey
-        ]));
     }
 }
