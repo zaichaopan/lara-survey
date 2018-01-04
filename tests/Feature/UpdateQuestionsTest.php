@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Option;
 use App\Question;
 use Tests\TestCase;
 use App\OpenSubmittable;

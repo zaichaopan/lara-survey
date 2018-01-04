@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Survey;
 use App\Completion;
-use App\Exceptions\InvalidAnswerException;
 
 class CompletionsController extends Controller
 {

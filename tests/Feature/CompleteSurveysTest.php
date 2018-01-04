@@ -2,11 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Option;
 use Tests\TestCase;
-use App\OpenSubmittable;
-use App\ScaleSubmittable;
-use App\MultipleChoiceSubmittable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CompleteSurveysTest extends TestCase
@@ -40,7 +36,7 @@ class CompleteSurveysTest extends TestCase
     }
 
     /** @test */
-    public function question_id_is_quired_in_answers_attributes()
+    public function question_id_is_required_in_answers_attributes()
     {
         $this->login();
         $completion = factory('App\Completion')->create();

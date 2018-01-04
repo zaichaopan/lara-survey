@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Survey;
 use App\Question;
-use App\ScaleSubmittable;
 use App\Http\Requests\QuestionForm;
 
 class QuestionsController extends Controller
