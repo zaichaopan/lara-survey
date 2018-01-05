@@ -14,7 +14,7 @@ class Question extends Model
 
     protected $guarded = [];
 
-    protected $with = ['options', 'submittable'];
+    protected $with = ['options', 'submittable', 'answers'];
 
     public function survey()
     {
@@ -97,5 +97,23 @@ class Question extends Model
     public function findOptionByText($text)
     {
         return $this->options->firstWhere('text', $text);
+    }
+
+    public function summary()
+    {
+        return $this->submittable->summary($this);
+    }
+
+    public function optionSummary($options)
+    {
+        $answers = $this->answers;
+        return collect($options)->map(function ($option) use ($answers) {
+            return new OptionSummary($option, $answers);
+        });
+    }
+
+    public function openSubmitSummary()
+    {
+        return $this->answers-> whereNotIn('text', [null, ''])->all();
     }
 }

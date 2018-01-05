@@ -166,4 +166,91 @@ class QuestionTest extends TestCase
         $this->assertNotNull($question->findOptionByText($text));
         $this->assertNull($question->findOptionByText($invalidText));
     }
+
+    /** @test */
+    public function it_can_get_open_submit_summary()
+    {
+        $openQuestion = factory('App\Question')->states('open')->create();
+        $answerOne = factory('App\Answer')->create([
+            'question_id' => $openQuestion->id,
+            'text' => null
+        ]);
+        $answerTwo = factory('App\Answer')->create([
+            'question_id' => $openQuestion->id,
+        ]);
+        $answerTree = factory('App\Answer')->create([
+            'question_id' => $openQuestion->id,
+            'text' => ''
+        ]);
+        $answerTree = factory('App\Answer')->create([
+            'question_id' => $openQuestion->id,
+        ]);
+
+        $this->assertCount(2, $openQuestion->summary());
+    }
+
+    /** @test */
+    public function it_can_get_option_summary_for_multiple_choice()
+    {
+        $multipleChoiceQuestion = createMultipleChoiceQuestion();
+        factory('App\Answer', 2)->create([
+            'question_id' => $multipleChoiceQuestion->id,
+            'text' => $multipleChoiceQuestion->options[0]->text
+        ]);
+        factory('App\Answer', 1)->create([
+            'question_id' => $multipleChoiceQuestion->id,
+            'text' => $multipleChoiceQuestion->options[2]->text
+        ]);
+
+        $summary =  $multipleChoiceQuestion->summary();
+
+        $this->assertEquals($multipleChoiceQuestion->options[0]->text, $summary[0]->option());
+        $this->assertEquals(2, $summary[0]->chosenCount());
+        $this->assertEquals('67%', $summary[0]->chosenInPercentage());
+
+        $this->assertEquals($multipleChoiceQuestion->options[1]->text, $summary[1]->option());
+        $this->assertEquals(0, $summary[1]->chosenCount());
+        $this->assertEquals('0%', $summary[1]->chosenInPercentage());
+
+        $this->assertEquals($multipleChoiceQuestion->options[2]->text, $summary[2]->option());
+        $this->assertEquals(1, $summary[2]->chosenCount());
+        $this->assertEquals('33%', $summary[2]->chosenInPercentage());
+    }
+
+    /** @test */
+    public function it_can_get_option_summary_for_scale_submittable()
+    {
+        $scaleSubmittable = factory('App\ScaleSubmittable')->create([
+            'minimum' => 1,
+            'maximum' => 5
+        ]);
+        $scaleQuestion = factory('App\Question')->states('scale')->create([
+            'submittable_id' => $scaleSubmittable->id
+        ]);
+
+        factory('App\Answer', 2)->create([
+            'question_id' => $scaleQuestion->id,
+            'text' => '1'
+        ]);
+
+        factory('App\Answer', 1)->create([
+            'question_id' => $scaleQuestion->id,
+            'text' => '3'
+        ]);
+
+        $summary =  $scaleQuestion->summary();
+        $this->assertCount(5, $summary);
+
+        $this->assertEquals('1', $summary[0]->option());
+        $this->assertEquals(2, $summary[0]->chosenCount());
+        $this->assertEquals('67%', $summary[0]->chosenInPercentage());
+
+        $this->assertEquals('2', $summary[1]->option());
+        $this->assertEquals(0, $summary[1]->chosenCount());
+        $this->assertEquals('0%', $summary[1]->chosenInPercentage());
+
+        $this->assertEquals('3', $summary[2]->option());
+        $this->assertEquals(1, $summary[2]->chosenCount());
+        $this->assertEquals('33%', $summary[2]->chosenInPercentage());
+    }
 }

@@ -53,4 +53,9 @@ class Survey extends Model
         $completion->addAnswers($this->buildAnswers($answersAttributes));
         return $completion;
     }
+
+    public function getSummaryAttribute()
+    {
+        return new Summary($this);
+    }
 }

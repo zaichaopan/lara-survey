@@ -37,4 +37,10 @@ class ScaleSubmittable extends Model
 
         return true;
     }
+
+    public function summary($question)
+    {
+        $options =collect(range($this->minimum, $this->maximum));
+        return $question->optionSummary($options);
+    }
 }

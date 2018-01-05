@@ -12,4 +12,9 @@ class OpenSubmittable extends Model
     {
         $question->associateType(tap($this)->save());
     }
+
+    public function summary($question)
+    {
+        return $question->openSubmitSummary();
+    }
 }

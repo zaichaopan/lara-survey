@@ -133,6 +133,19 @@ class SurveyTest extends TestCase
         $this->assertTrue($this->survey->completions->contains($completion->id));
     }
 
+    /** @test */
+    public function it_has_a_summary()
+    {
+        $this->assertEquals(0, $this->survey->summary->questionsCount);
+        $this->assertEquals(0, $this->survey->summary->completionsCount);
+        $completion = factory('App\Completion')->create(['survey_id' => $this->survey->id]);
+        $qustions = factory('App\Question', 2)->create(['survey_id' => $this->survey->id]);
+        tap($this->survey->fresh(), function ($survey) {
+            $this->assertEquals(2, $survey->summary->questionsCount);
+            $this->assertEquals(1, $survey->summary->completionsCount);
+        });
+    }
+
     protected function assertQuestionType($question, $klass)
     {
         $this->assertTrue($this->survey->questions->contains($question->id));
