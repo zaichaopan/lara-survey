@@ -11,6 +11,12 @@ class SurveysController extends Controller
         $this->middleware('auth');
     }
 
+    public function index()
+    {
+        $surveys = Survey::latest()->get();
+        return view('surveys.index', compact('surveys'));
+    }
+
     public function show(Survey $survey)
     {
         return view('surveys.show', compact('survey'));

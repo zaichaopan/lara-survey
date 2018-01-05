@@ -29,9 +29,9 @@ class CompletionsController extends Controller
         $size = count($survey->questions);
 
         request()->validate([
-            'answers_attributes' => 'required|size:' . $size,
+            'answers_attributes' => 'required|array|size:' . $size,
             'answers_attributes.*.question_id' => 'required|integer',
-            'answers_attributes.*.text' => 'nullable'
+            //'answers_attributes.*.text' => 'nullable'
         ]);
 
         return request('answers_attributes');

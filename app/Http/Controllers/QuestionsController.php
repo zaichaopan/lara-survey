@@ -15,9 +15,7 @@ class QuestionsController extends Controller
 
     public function create(Survey $survey)
     {
-        $submittableType = request('submittable_type');
-        abort_unless(in_array($submittableType, Question::SUBMITTABLE_TYPES), 404);
-        $question = (new Question)->buildAttributes($submittableType);
+        $question = (new Question)->buildAttributes(request('submittable_type'));
         return view('questions.create', compact('question', 'survey'));
     }
 

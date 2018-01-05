@@ -4,9 +4,16 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\InvalidAnswerException;
+use App\Exceptions\ClassNotFound;
 
 class Survey extends Model
 {
+    const SUMMARY_STRATEGIES = [
+        'user_answer' => 'App\Summaries\UserAnswer',
+        'break_down' => 'App\Summaries\Breakdown',
+        'default' => 'App\Summaries\Breakdown'
+    ];
+
     protected $guarded = [];
 
     protected $with = ['author', 'questions'];
@@ -28,16 +35,15 @@ class Survey extends Model
 
     public function addQuestion(array $attributes)
     {
-        $question  = $this->questions()->create(['title' => $attributes['title']]);
-        $submittableType =  "App\\" . studly_case($attributes['submittable_type']);
-        (new $submittableType)->buildQuestion($question, $attributes);
+        $question = $this->questions()->create(['title' => $attributes['title']]);
+        $class = array_get(Question::SUBMITTABLE_TYPES, $attributes['submittable_type'], Question::SUBMITTABLE_TYPES['default']);
+        (new $class)->buildQuestion($question, $attributes);
         return $question;
     }
 
     public function buildAnswers(array $attributes)
     {
         $questions = $this->questions;
-
         return collect($attributes)->map(function ($item) use ($questions) {
             $questionId = $item['question_id'];
             $text =  isset($item['text']) ? $item['text'] : '';
@@ -49,13 +55,14 @@ class Survey extends Model
 
     public function completeBy(User $user, array $answersAttributes)
     {
-        $completion =  $this->completions()->create(['user_id' => $user->id]);
+        $completion = $this->completions()->create(['user_id' => $user->id]);
         $completion->addAnswers($this->buildAnswers($answersAttributes));
         return $completion;
     }
 
-    public function getSummaryAttribute()
+    public function summary($strategy)
     {
-        return new Summary($this);
+        $class = array_get(static::SUMMARY_STRATEGIES, $strategy, static::SUMMARY_STRATEGIES['default']);
+        return new $class($this);
     }
 }

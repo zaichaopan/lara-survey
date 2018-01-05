@@ -101,10 +101,10 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_can_build_answers()
     {
-        $scaleSumittable = factory('App\ScaleSubmittable')->create(['minimum' => 0, 'maximum' => 5 ]);
+        $scaleSubmittable = factory('App\ScaleSubmittable')->create(['minimum' => 0, 'maximum' => 5 ]);
         $scaleQuestion = factory('App\Question')->states('scale')->create([
             'survey_id' => $this->survey->id,
-            'submittable_id' => $scaleSumittable->id
+            'submittable_id' => $scaleSubmittable->id
         ]);
         $multipleChoiceQuestion = createMultipleChoiceQuestion($this->survey);
         $openQuestion = factory('App\Question')->states('open')->create(['survey_id' => $this->survey->id]);
@@ -136,13 +136,16 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_has_a_summary()
     {
-        $this->assertEquals(0, $this->survey->summary->questionsCount);
-        $this->assertEquals(0, $this->survey->summary->completionsCount);
+        $summary = $this->survey->summary('break_down');
+
+        $this->assertEquals(0, $summary->questionsCount);
+        $this->assertEquals(0, $summary->completionsCount);
         $completion = factory('App\Completion')->create(['survey_id' => $this->survey->id]);
-        $qustions = factory('App\Question', 2)->create(['survey_id' => $this->survey->id]);
+        factory('App\Question', 2)->create(['survey_id' => $this->survey->id]);
         tap($this->survey->fresh(), function ($survey) {
-            $this->assertEquals(2, $survey->summary->questionsCount);
-            $this->assertEquals(1, $survey->summary->completionsCount);
+            $summary = $survey->summary('break_down');
+            $this->assertEquals(2, $summary->questionsCount);
+            $this->assertEquals(1, $summary->completionsCount);
         });
     }
 

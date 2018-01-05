@@ -25,9 +25,11 @@ class QuestionForm extends FormRequest
      */
     public function rules()
     {
+        $submittableTypes = array_keys(Question::SUBMITTABLE_TYPES);
+
         return [
             'title' => 'required',
-            'submittable_type' => ['required', Rule::in(Question::SUBMITTABLE_TYPES)],
+            'submittable_type' => ['required', Rule::in($submittableTypes)],
             'options' => 'options',
             'minimum' => 'minscale',
             'maximum' => 'maxscale',

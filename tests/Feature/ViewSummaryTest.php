@@ -12,7 +12,7 @@ class ViewSummaryTest extends TestCase
     /** @test */
     public function guests_cannot_view_survey_summary()
     {
-        $this->get(route('surveys.summaries.show', ['survey' => 1]))->assertRedirect('login');
+        $this->get(route('surveys.summaries.show', ['survey' => 1, 'summary' => 'break_down']))->assertRedirect('login');
     }
 
     /** @test */
@@ -33,23 +33,23 @@ class ViewSummaryTest extends TestCase
              'submittable_id' => $scaleSubmittable->id
          ]);
 
-        $openQuestion = factory('App\Question')->states('open')->create(['survey_id' => $survey->id ]);
+        $openQuestion = factory('App\Question')->states('open')->create(['survey_id' => $survey->id]);
 
-        $completion = factory('App\Completion')->create(['survey_id' => $survey->id ]);
+        $completion = factory('App\Completion')->create(['survey_id' => $survey->id]);
 
-        $answerMultipleChoice  = factory('App\Answer')->create([
+        $answerMultipleChoice = factory('App\Answer')->create([
              'question_id' => $multipleChoiceQuestion->id,
              'completion_id' => $completion->id,
              'text' => $multipleChoiceQuestion->options[0]->text
         ]);
 
-        $answerScaleQuestion  = factory('App\Answer')->create([
+        $answerScaleQuestion = factory('App\Answer')->create([
              'question_id' => $scaleQuestion->id,
              'completion_id' => $completion->id,
              'text' => 4
         ]);
 
-        $answerOpenQuestion  = factory('App\Answer')->create([
+        $answerOpenQuestion = factory('App\Answer')->create([
              'question_id' => $openQuestion->id,
              'completion_id' => $completion->id,
              'text' => 'Hello world!'
@@ -57,13 +57,17 @@ class ViewSummaryTest extends TestCase
 
         $this->login();
 
-        $this->get(route('surveys.summaries.show', ['survey' => $survey]))
-            ->assertSee($survey->title)
-            ->assertSee("3 questions")
-            ->assertSee("1 completions")
+        $this->get(route('surveys.summaries.show', ['survey' => $survey, 'summary' => 'break_down']))
+             ->assertSee($survey->title)
+            ->assertSee('3 questions')
+            ->assertSee('1 completions')
             ->assertSee($multipleChoiceQuestion->options[0]->text)
             ->assertSee('1 chosen')
             ->assertSee('100%')
             ->assertSee('Hello world');
+    }
+
+    public function auth_user_can_view_his_own_answers()
+    {
     }
 }

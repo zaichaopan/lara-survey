@@ -24,18 +24,6 @@ class CreateQuestionsTest extends TestCase
     }
 
     /** @test */
-    public function it_redirects_to_404_if_question_submittable_type_not_found()
-    {
-        $jane = factory('App\User')->create();
-        $survey = factory('App\Survey')->create(['user_id' => $jane->id]);
-        $this->login($jane);
-        $this->get(route('surveys.questions.create', [
-            'survey' => $survey,
-            'submittable_type' => 'invalid_type'
-        ]))->assertStatus(404);
-    }
-
-    /** @test */
     public function question_submittable_type_is_required()
     {
         $this->createQuestion([

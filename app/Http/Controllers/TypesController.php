@@ -14,8 +14,6 @@ class TypesController extends Controller
 
     public function create(Question $question)
     {
-        $submittableType = request('submittable_type');
-        abort_unless(in_array($submittableType, Question::SUBMITTABLE_TYPES), 404);
         $question = $question->buildAttributes($submittableType);
         return view('types.create', compact('question'));
     }
@@ -28,8 +26,10 @@ class TypesController extends Controller
 
     protected function questionAttributes()
     {
+        $submittableTypes = array_keys(Question::SUBMITTABLE_TYPES);
+
         return request()->validate([
-            'submittable_type' => ['required', Rule::in(Question::SUBMITTABLE_TYPES)],
+            'submittable_type' => ['required', Rule::in($submittableTypes)],
             'options' => 'options',
             'minimum' => 'minscale',
             'maximum' => 'maxscale'

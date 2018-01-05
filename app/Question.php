@@ -2,14 +2,17 @@
 
 namespace App;
 
+use App\Summaries\OptionSummary;
+use App\Exceptions\ClassNotFound;
 use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model
 {
     const SUBMITTABLE_TYPES = [
-        'multiple_choice_submittable',
-        'open_submittable',
-        'scale_submittable'
+        'open_submittable' => 'App\OpenSubmittable',
+        'scale_submittable' => 'App\ScaleSubmittable',
+        'multiple_choice_submittable' => 'App\MultipleChoiceSubmittable',
+        'default' => 'App\MultipleChoiceSubmittable'
     ];
 
     protected $guarded = [];
@@ -38,9 +41,7 @@ class Question extends Model
 
     public function submittableType()
     {
-        return  $this->submittable_type
-            ? snake_case(class_basename($this->submittable_type))
-            : null;
+        return snake_case(class_basename($this->submittable_type));
     }
 
     public function associateType($type)
@@ -62,9 +63,9 @@ class Question extends Model
         return $this;
     }
 
-    public function buildAttributes($submittableType)
+    public function buildAttributes($type)
     {
-        $class =  "App\\" . studly_case($submittableType);
+        $class = array_get(static::SUBMITTABLE_TYPES, $type, static::SUBMITTABLE_TYPES['default']);
         $this->submittable_type = $class;
         $this->submittable = new $class;
         optional_method($this->submittable)->buildAttributes($this);
@@ -73,10 +74,11 @@ class Question extends Model
 
     public function switchType($attributes)
     {
+        $type = $attributes['submittable_type'];
+        $class = array_get(static::SUBMITTABLE_TYPES, $type, static::SUBMITTABLE_TYPES['default']);
         optional_method($this->submittable)->clean();
         $this->dissociateType();
-        $newSubmittableType =  "App\\" . studly_case($attributes['submittable_type']);
-        (new $newSubmittableType)->buildQuestion($this, $attributes);
+        (new $class)->buildQuestion($this, $attributes);
         return $this;
     }
 

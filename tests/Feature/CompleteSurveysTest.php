@@ -71,7 +71,10 @@ class CompleteSurveysTest extends TestCase
         $question = factory('App\Question')->create();
         $this->postAnswers($question->survey, [
             'answers_attributes' => [
-                ['question_id' => 100],
+                [
+                    'question_id' => 100,
+                    'text' => 'foobar'
+                ],
              ]
         ])->assertSessionHas('message', 'Oops! Something went wrong!');
     }

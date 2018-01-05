@@ -46,6 +46,7 @@ class QuestionTest extends TestCase
     /** @test */
     public function it_get_submittable_type__snake_case_short_name()
     {
+        $this->assertEquals(null, (new Question)->submittableType());
         $question = new Question(['submittable_type' => 'App\MultipleChoiceSubmittable']);
         $this->assertEquals('multiple_choice_submittable', $question->submittableType());
     }

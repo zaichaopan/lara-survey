@@ -12,6 +12,23 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    <style>
+        ul {
+            padding-left:0px;
+            list-style-type: none;
+        }
+
+        a {
+            text-decoration: underline;
+        }
+
+        .survey-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -29,7 +46,7 @@
 
                     <!-- Branding Image -->
                     <a class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Laravel') }}
+                        {{ config('app.name', 'Lara Survey') }}
                     </a>
                 </div>
 
@@ -71,7 +88,9 @@
             </div>
         </nav>
 
-        @yield('content')
+        <div class="container">
+            @yield('content')
+        </div>
     </div>
 
     <!-- Scripts -->
