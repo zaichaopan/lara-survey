@@ -171,6 +171,9 @@ class QuestionTest extends TestCase
     public function it_can_get_open_submit_summary()
     {
         $openQuestion = factory('App\Question')->states('open')->create();
+
+        $this->assertCount(0, $openQuestion->summary());
+
         $answerOne = factory('App\Answer')->create([
             'question_id' => $openQuestion->id,
             'text' => null
@@ -186,13 +189,20 @@ class QuestionTest extends TestCase
             'question_id' => $openQuestion->id,
         ]);
 
-        $this->assertCount(2, $openQuestion->summary());
+        $this->assertCount(2, $openQuestion->fresh()->summary());
     }
 
     /** @test */
     public function it_can_get_option_summary_for_multiple_choice()
     {
         $multipleChoiceQuestion = createMultipleChoiceQuestion();
+
+        $summary =  $multipleChoiceQuestion->summary();
+
+        $this->assertEquals($multipleChoiceQuestion->options[0]->text, $summary[0]->option());
+        $this->assertEquals(0, $summary[0]->chosenCount());
+        $this->assertEquals('0%', $summary[0]->chosenInPercentage());
+
         factory('App\Answer', 2)->create([
             'question_id' => $multipleChoiceQuestion->id,
             'text' => $multipleChoiceQuestion->options[0]->text
@@ -202,7 +212,7 @@ class QuestionTest extends TestCase
             'text' => $multipleChoiceQuestion->options[2]->text
         ]);
 
-        $summary =  $multipleChoiceQuestion->summary();
+        $summary =  $multipleChoiceQuestion->fresh()->summary();
 
         $this->assertEquals($multipleChoiceQuestion->options[0]->text, $summary[0]->option());
         $this->assertEquals(2, $summary[0]->chosenCount());
@@ -224,9 +234,16 @@ class QuestionTest extends TestCase
             'minimum' => 1,
             'maximum' => 5
         ]);
+
         $scaleQuestion = factory('App\Question')->states('scale')->create([
             'submittable_id' => $scaleSubmittable->id
         ]);
+
+        $summary =  $scaleQuestion->summary();
+        $this->assertCount(5, $summary);
+        $this->assertEquals('1', $summary[0]->option());
+        $this->assertEquals(0, $summary[0]->chosenCount());
+        $this->assertEquals('0%', $summary[0]->chosenInPercentage());
 
         factory('App\Answer', 2)->create([
             'question_id' => $scaleQuestion->id,
@@ -238,7 +255,7 @@ class QuestionTest extends TestCase
             'text' => '3'
         ]);
 
-        $summary =  $scaleQuestion->summary();
+        $summary =  $scaleQuestion->fresh()->summary();
         $this->assertCount(5, $summary);
 
         $this->assertEquals('1', $summary[0]->option());
@@ -252,5 +269,10 @@ class QuestionTest extends TestCase
         $this->assertEquals('3', $summary[2]->option());
         $this->assertEquals(1, $summary[2]->chosenCount());
         $this->assertEquals('33%', $summary[2]->chosenInPercentage());
+    }
+
+    /** @test */
+    public function it_can_get_summary_when_there_are_no_answers()
+    {
     }
 }

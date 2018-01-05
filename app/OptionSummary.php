@@ -30,6 +30,8 @@ class OptionSummary
 
     public function chosenInPercentage()
     {
-        return round($this->chosenCount()/$this->answersCount() * 100) . '%';
+        return $this->answersCount()
+            ? round($this->chosenCount()/$this->answersCount() * 100) . '%'
+            :  '0%';
     }
 }

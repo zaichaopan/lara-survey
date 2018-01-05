@@ -106,7 +106,7 @@ class Question extends Model
 
     public function optionSummary($options)
     {
-        $answers = $this->answers;
+        $answers = $this->answers ?? collect();
         return collect($options)->map(function ($option) use ($answers) {
             return new OptionSummary($option, $answers);
         });
