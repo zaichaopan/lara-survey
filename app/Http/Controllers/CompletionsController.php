@@ -30,8 +30,7 @@ class CompletionsController extends Controller
 
         request()->validate([
             'answers_attributes' => 'required|array|size:' . $size,
-            'answers_attributes.*.question_id' => 'required|integer',
-            //'answers_attributes.*.text' => 'nullable'
+            'answers_attributes.*.question_id' => 'required|integer'
         ]);
 
         return request('answers_attributes');

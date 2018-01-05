@@ -36,7 +36,8 @@ class Survey extends Model
     public function addQuestion(array $attributes)
     {
         $question = $this->questions()->create(['title' => $attributes['title']]);
-        $class = array_get(Question::SUBMITTABLE_TYPES, $attributes['submittable_type'], Question::SUBMITTABLE_TYPES['default']);
+        $type = $attributes['submittable_type'];
+        $class = array_get(Question::SUBMITTABLE_TYPES, $type, Question::SUBMITTABLE_TYPES['default']);
         (new $class)->buildQuestion($question, $attributes);
         return $question;
     }
@@ -47,7 +48,10 @@ class Survey extends Model
         return collect($attributes)->map(function ($item) use ($questions) {
             $questionId = $item['question_id'];
             $text =  isset($item['text']) ? $item['text'] : '';
-            throw_exception_unless($question = $questions->firstWhere('id', $questionId), InvalidAnswerException::class);
+            throw_exception_unless(
+                $question = $questions->firstWhere('id', $questionId),
+                InvalidAnswerException::class
+            );
             optional_method($question->submittable)->validAnswer($text);
             return new Answer(['question_id' => $questionId,'text' => $text]);
         });

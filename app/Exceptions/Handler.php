@@ -53,10 +53,6 @@ class Handler extends ExceptionHandler
             return back()->withInput()->with('message', 'Oops! Something went wrong!');
         }
 
-        if ($exception instanceof  ClassNotFound) {
-            return bort(404);
-        }
-
         return parent::render($request, $exception);
     }
 }
