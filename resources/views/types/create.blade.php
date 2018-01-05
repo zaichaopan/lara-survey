@@ -4,7 +4,7 @@
  <input type="text" name="question_submittable_type"
         value="{{ $question->submittableType() }}" hidden>
 
-  @include("questions._{$question->submittableType()}")
+  @include("{$question->submittableType()}s._form")
 
   <button type="submit">Submit</button>
 </form>
