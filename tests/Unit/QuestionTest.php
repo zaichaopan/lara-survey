@@ -270,9 +270,4 @@ class QuestionTest extends TestCase
         $this->assertEquals(1, $summary[2]->chosenCount());
         $this->assertEquals('33%', $summary[2]->chosenInPercentage());
     }
-
-    /** @test */
-    public function it_can_get_summary_when_there_are_no_answers()
-    {
-    }
 }

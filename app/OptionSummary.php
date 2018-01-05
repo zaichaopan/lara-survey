@@ -34,4 +34,13 @@ class OptionSummary
             ? round($this->chosenCount()/$this->answersCount() * 100) . '%'
             :  '0%';
     }
+
+    public function __get($property)
+    {
+        if (method_exists($this, $property)) {
+            return call_user_func([$this, $property]);
+        }
+
+        return "{$property} cannot be found!";
+    }
 }

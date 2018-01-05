@@ -21,6 +21,16 @@ class Summary
         return $this->survey->questions->count();
     }
 
+    public function questions()
+    {
+        return $this->survey->questions;
+    }
+
+    public function survey()
+    {
+        return $this->survey;
+    }
+
     public function __get($property)
     {
         if (method_exists($this, $property)) {

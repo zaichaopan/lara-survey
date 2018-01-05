@@ -17,4 +17,5 @@ Route::resource('surveys', 'SurveysController', ['only' => ['create', 'show', 's
 Route::resource('surveys.questions', 'QuestionsController', ['only' => ['create', 'edit', 'store', 'update']]);
 Route::resource('questions.types', 'TypesController', ['only' => ['create','store']]);
 Route::resource('surveys.completions', 'CompletionsController', ['only' => ['show', 'store']]);
+Route::get('/surveys/{survey}/summaries', 'SummariesController@show')->name('surveys.summaries.show');
 Auth::routes();
