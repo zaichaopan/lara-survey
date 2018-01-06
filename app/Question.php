@@ -3,8 +3,8 @@
 namespace App;
 
 use App\Summaries\OptionSummary;
-use App\Exceptions\ClassNotFound;
 use Illuminate\Database\Eloquent\Model;
+use App\Exceptions\InvalidAnswerException;
 
 class Question extends Model
 {
@@ -109,5 +109,16 @@ class Question extends Model
     public function openSubmitSummary()
     {
         return $this->answers-> whereNotIn('text', [null, ''])->all();
+    }
+
+    public function buildAnswer($attributes)
+    {
+        throw_exception_unless(
+            isset($attributes[$this->id]),
+            InvalidAnswerException::class
+        );
+        $text = $attributes[$this->id]['text'];
+        optional_method($this->submittable)->validAnswerText($text);
+        return new Answer(['question_id' => $this->id, 'text'=> $text]);
     }
 }

@@ -28,14 +28,15 @@ class ScaleSubmittable extends Model
         return tap($this)->save();
     }
 
-    public function validAnswer($text)
+    public function validAnswerText($text)
     {
-        throw_exception_unless(
-            $this->minimum <= $text && $text <= $this->maximum,
-            InvalidAnswerException::class
-        );
-
+        throw_exception_unless($this->validScale($text), InvalidAnswerException::class);
         return true;
+    }
+
+    public function validScale($scale)
+    {
+        return $this->minimum <= $scale && $scale <= $this->maximum;
     }
 
     public function summary($question)

@@ -36,16 +36,7 @@ class Survey extends Model
 
     public function buildAnswers(array $attributes)
     {
-        $questions = $this->questions;
-        return collect($attributes)->map(function ($item) use ($questions) {
-            $text =  isset($item['text']) ? $item['text'] : '';
-            throw_exception_unless(
-                $question = $questions->firstWhere('id', $item['question_id']),
-                InvalidAnswerException::class
-            );
-            optional_method($question->submittable)->validAnswer($text);
-            return new Answer(['question_id' => $item['question_id'],'text' => $text]);
-        });
+        return collect($this->questions)->map->buildAnswer($attributes);
     }
 
     public function completeBy(User $user, array $answersAttributes)

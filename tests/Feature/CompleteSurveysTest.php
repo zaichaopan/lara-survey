@@ -36,20 +36,6 @@ class CompleteSurveysTest extends TestCase
     }
 
     /** @test */
-    public function question_id_is_required_in_answers_attributes()
-    {
-        $this->login();
-        $completion = factory('App\Completion')->create();
-        $this->postAnswers($completion->survey, [
-            'answers_attributes' => [
-                [
-                    'question_id' => null,
-                ]
-            ]
-        ])->assertSessionHasErrors('answers_attributes.0.question_id');
-    }
-
-    /** @test */
     public function answers_number_must_match_question_number()
     {
         $this->login();
@@ -57,9 +43,7 @@ class CompleteSurveysTest extends TestCase
         $questions = factory('App\Question', 2)->create(['survey_id' => $survey->id]);
         $this->postAnswers($survey, [
             'answers_attributes' => [
-                [
-                    'question_id' => $questions[0]->id
-                ],
+                "{$questions[0]->id}" =>[ 'text' => 'foobar' ],
              ]
         ])->assertSessionHasErrors('answers_attributes');
     }
@@ -71,10 +55,7 @@ class CompleteSurveysTest extends TestCase
         $question = factory('App\Question')->create();
         $this->postAnswers($question->survey, [
             'answers_attributes' => [
-                [
-                    'question_id' => 100,
-                    'text' => 'foobar'
-                ],
+                "100" => ['text' => 'foobar'],
              ]
         ])->assertSessionHas('message', 'Oops! Something went wrong!');
     }
@@ -88,10 +69,7 @@ class CompleteSurveysTest extends TestCase
         $this->assertFalse(in_array($invalidAnswerText, $question->options->pluck('text')->all()));
         $this->postAnswers($question->survey, [
             'answers_attributes' => [
-                [
-                    'question_id' => $question->id,
-                    'text' => $invalidAnswerText,
-                ]
+               "{$question->jd}" => ['text' => $invalidAnswerText]
              ]
         ])->assertSessionHas('message', 'Oops! Something went wrong!');
     }
@@ -106,10 +84,7 @@ class CompleteSurveysTest extends TestCase
         ]);
         $this->postAnswers($question->survey, [
             'answers_attributes' => [
-                [
-                    'question_id' => $question->id,
-                    'text' => '11',
-                ]
+                "{$question->id}" => ['text' => '11']
              ]
         ])->assertSessionHas('message', 'Oops! Something went wrong!');
     }
@@ -125,16 +100,13 @@ class CompleteSurveysTest extends TestCase
 
         $this->postAnswers($survey, [
             'answers_attributes' => [
-                [
-                    'question_id' => $multipleChoiceQuestion->id,
+                "{$multipleChoiceQuestion->id}" =>[
                     'text' => $multipleChoiceQuestion->options->first()->text,
                 ],
-                [
-                    'question_id' => $scaleQuestion->id,
+                "{$scaleQuestion->id}" => [
                     'text' => $scaleQuestion->submittable->maximum,
                 ],
-                [
-                    'question_id' => $openQuestion->id,
+                "{$openQuestion->id}" => [
                     'text' => 'foobar',
                 ],
              ]
@@ -145,9 +117,6 @@ class CompleteSurveysTest extends TestCase
         $this->assertCount(1, $survey->completions);
         $answers = $survey->completions[0]->answers;
         $this->assertCount(3, $answers);
-        $this->assertEquals([
-            $multipleChoiceQuestion->id, $scaleQuestion->id, $openQuestion->id
-        ], $answers->pluck('question_id')->all());
         $this->assertEquals([
             $multipleChoiceQuestion->options->first()->text, $scaleQuestion->submittable->maximum, 'foobar'
         ], $answers->pluck('text')->all());

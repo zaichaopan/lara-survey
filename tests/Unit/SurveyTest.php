@@ -71,7 +71,7 @@ class SurveyTest extends TestCase
     public function it_throws_exception_if_a_unknown_question_found_during_building_answers()
     {
         $question = factory('App\Question')->create(['survey_id' => $this->survey->id]);
-        $attributes = [['question_id' => 100 ] ];
+        $attributes = ["{100}" => [ ]];
         $this->expectException(InvalidAnswerException::class);
         $this->survey->buildAnswers($attributes);
     }
@@ -81,7 +81,9 @@ class SurveyTest extends TestCase
     {
         $multipleChoiceQuestion = createMultipleChoiceQuestion($this->survey);
         $this->assertFalse(in_array('foobar', $multipleChoiceQuestion->options->pluck('text')->all()));
-        $attributes = [['question_id' => $multipleChoiceQuestion->id,'text' => 'foobar']];
+        $attributes = [
+            "{$multipleChoiceQuestion->id}" =>['text' => 'foobar']
+        ];
         $this->expectException(InvalidAnswerException::class);
         $this->survey->buildAnswers($attributes);
     }
@@ -94,7 +96,9 @@ class SurveyTest extends TestCase
             'survey_id' => $this->survey->id,
             'submittable_id' => $scaleSubmittable->id
         ]);
-        $attributes = [['question_id' => $scaleQuestion->id,'text' => '11']];
+        $attributes = [
+            "{$scaleQuestion->id}" =>['text' => '11']
+        ];
         $this->expectException(InvalidAnswerException::class);
         $this->survey->buildAnswers($attributes);
     }
@@ -111,13 +115,22 @@ class SurveyTest extends TestCase
         $openQuestion = factory('App\Question')->states('open')->create(['survey_id' => $this->survey->id]);
 
         $attributes = [
-           ['question_id' => $scaleQuestion->id,'text' => 5],
-           ['question_id' => $multipleChoiceQuestion->id,'text' => $multipleChoiceQuestion->options->first()->text],
-           ['question_id' => $openQuestion->id,'text' => 'foobar']
+            "{$scaleQuestion->id}" => [
+                'text' => 5
+            ],
+            "{$multipleChoiceQuestion->id}" => [
+                'text' => $multipleChoiceQuestion->options->first()->text
+            ],
+            "{$openQuestion->id}" => [
+                'text' => 'foobar'
+            ]
         ];
         $answers = $this->survey->fresh()->buildAnswers($attributes);
 
         $this->assertCount(3, $answers);
+        $this->assertEquals([
+            '5', $multipleChoiceQuestion->options->first()->text, 'foobar'
+        ], $answers->pluck('text')->all());
     }
 
     /** @test */
@@ -126,8 +139,7 @@ class SurveyTest extends TestCase
         $user = factory('App\User')->create();
         $question = createMultipleChoiceQuestion($this->survey);
         $completion = $this->survey->completeBy($user, [
-            [
-                'question_id' => $question->id,
+            "{$question->id}"=>[
                 'text' => $question->options->first()->text
             ]
         ]);

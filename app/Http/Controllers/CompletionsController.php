@@ -16,7 +16,7 @@ class CompletionsController extends Controller
     {
         abort_if(auth()->user()->hasCompleted($survey), 400);
         $completion = $survey->completeBy(auth()->user(), $this->answersAttributes($survey));
-        return redirect(route('completions.show', ['completion' => $completion]));
+        return redirect(route('surveys.show', ['survey' => $survey]));
     }
 
     public function show(Completion $completion)
@@ -27,12 +27,7 @@ class CompletionsController extends Controller
     protected function answersAttributes($survey)
     {
         $size = count($survey->questions);
-
-        request()->validate([
-            'answers_attributes' => 'required|array|size:' . $size,
-            'answers_attributes.*.question_id' => 'required|integer'
-        ]);
-
+        $test = request()->validate(['answers_attributes' => 'required|array|size:' . $size]);
         return request('answers_attributes');
     }
 }

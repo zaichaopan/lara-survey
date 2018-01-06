@@ -11,7 +11,7 @@ class ScaleSubmittableTest extends TestCase
     use  RefreshDatabase;
 
     /** @test */
-    public function it_can_valid_answer()
+    public function it_can_valid_answer_text()
     {
         $question = factory('App\Question')->create();
         $scaleSubmittable = new ScaleSubmittable([
@@ -21,12 +21,12 @@ class ScaleSubmittableTest extends TestCase
         $scaleSubmittable->save();
         $question->associateType($scaleSubmittable);
         $scaleSubmittable = $scaleSubmittable->fresh();
-        $this->assertTrue($scaleSubmittable->validAnswer(1));
-        $this->assertTrue($scaleSubmittable->validAnswer(10));
-        $this->assertTrue($scaleSubmittable->validAnswer(5));
-        $this->assertTrue($scaleSubmittable->validAnswer('1'));
-        $this->assertTrue($scaleSubmittable->validAnswer('10'));
+        $this->assertTrue($scaleSubmittable->validAnswerText(1));
+        $this->assertTrue($scaleSubmittable->validAnswerText(10));
+        $this->assertTrue($scaleSubmittable->validAnswerText(5));
+        $this->assertTrue($scaleSubmittable->validAnswerText('1'));
+        $this->assertTrue($scaleSubmittable->validAnswerText('10'));
         $this->expectException(\Exception::class);
-        $scaleSubmittable->validAnswer('11');
+        $scaleSubmittable->validAnswerText('11');
     }
 }
