@@ -16,10 +16,10 @@
         </a> &#124
         <a href="{{route('surveys.questions.create', ['survey' => $survey, 'submittable_type' => 'open_submittable'])}}">
             Add Open Question
-        </a> 
+        </a>
         @if(auth()->user()->hasCompleted($survey))
         &#124
-        <a href="/answers">
+        <a href="{{route('surveys.summaries.show', ['survey'=>$survey, 'summary' => 'user_answer'])}}">
             Your Answers
         </a>
         @endif
