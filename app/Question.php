@@ -8,13 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Question extends Model
 {
-    const SUBMITTABLE_TYPES = [
-        'open_submittable' => 'App\OpenSubmittable',
-        'scale_submittable' => 'App\ScaleSubmittable',
-        'multiple_choice_submittable' => 'App\MultipleChoiceSubmittable',
-        'default' => 'App\MultipleChoiceSubmittable'
-    ];
-
     protected $guarded = [];
 
     protected $with = ['options', 'submittable', 'answers'];
@@ -65,7 +58,7 @@ class Question extends Model
 
     public function buildAttributes($type)
     {
-        $class = array_get(static::SUBMITTABLE_TYPES, $type, static::SUBMITTABLE_TYPES['default']);
+        $class = Submittable::get($type);
         $this->submittable_type = $class;
         $this->submittable = new $class;
         optional_method($this->submittable)->buildAttributes($this);
@@ -74,8 +67,7 @@ class Question extends Model
 
     public function switchType($attributes)
     {
-        $type = $attributes['submittable_type'];
-        $class = array_get(static::SUBMITTABLE_TYPES, $type, static::SUBMITTABLE_TYPES['default']);
+        $class = Submittable::get($attributes['submittable_type']);
         optional_method($this->submittable)->clean();
         $this->dissociateType();
         (new $class)->buildQuestion($this, $attributes);

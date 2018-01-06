@@ -8,6 +8,7 @@ use App\OpenSubmittable;
 use App\ScaleSubmittable;
 use App\MultipleChoiceSubmittable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Submittable;
 
 class UpdateQuestionsTest extends TestCase
 {
@@ -25,7 +26,7 @@ class UpdateQuestionsTest extends TestCase
 
         $this->viewChangeTypeForm(
             $question,
-            array_random(Question::SUBMITTABLE_TYPES)
+            array_random(Submittable::acceptTypes())
         )->assertRedirect('login');
 
         // redirect because of unauthenticated
@@ -37,7 +38,7 @@ class UpdateQuestionsTest extends TestCase
         $this->updateQuestion($question, [])->assertStatus(403);
         $this->viewChangeTypeForm(
             $question,
-            array_random(Question::SUBMITTABLE_TYPES)
+            array_random(Submittable::acceptTypes())
         )->assertStatus(403);
         $this->changeType($question, [])->assertStatus(403);
     }

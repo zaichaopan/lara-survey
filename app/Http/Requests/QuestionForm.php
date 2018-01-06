@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Question;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Submittable;
 
 class QuestionForm extends FormRequest
 {
@@ -25,11 +26,9 @@ class QuestionForm extends FormRequest
      */
     public function rules()
     {
-        $submittableTypes = array_keys(Question::SUBMITTABLE_TYPES);
-
         return [
             'title' => 'required',
-            'submittable_type' => ['required', Rule::in($submittableTypes)],
+            'submittable_type' => ['required', Rule::in(Submittable::acceptTypes())],
             'options' => 'options',
             'minimum' => 'minscale',
             'maximum' => 'maxscale',

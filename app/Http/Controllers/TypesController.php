@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Question;
 use Illuminate\Validation\Rule;
+use App\Submittable;
 
 class TypesController extends Controller
 {
@@ -21,15 +22,13 @@ class TypesController extends Controller
     public function store(Question $question)
     {
         $question->switchType($this->questionAttributes());
-        return redirect(route('surveys.show', ['survey' => $question->survey ]));
+        return redirect(route('surveys.show', ['survey' => $question->survey]));
     }
 
     protected function questionAttributes()
     {
-        $submittableTypes = array_keys(Question::SUBMITTABLE_TYPES);
-
         return request()->validate([
-            'submittable_type' => ['required', Rule::in($submittableTypes)],
+            'submittable_type' => ['required', Rule::in(Submittable::acceptTypes())],
             'options' => 'options',
             'minimum' => 'minscale',
             'maximum' => 'maxscale'

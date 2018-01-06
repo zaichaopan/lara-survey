@@ -9,6 +9,7 @@ use App\ScaleSubmittable;
 use App\MultipleChoiceSubmittable;
 use App\Exceptions\InvalidAnswerException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Submittable;
 
 class SurveyTest extends TestCase
 {
@@ -88,10 +89,10 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_throws_exception_if_invalid_text_found_during_building_answer_for_scale_question()
     {
-        $scaleSumittable = factory('App\ScaleSubmittable')->create(['minimum' => 0, 'maximum' => 5 ]);
+        $scaleSubmittable = factory('App\ScaleSubmittable')->create(['minimum' => 0, 'maximum' => 5 ]);
         $scaleQuestion = factory('App\Question')->states('scale')->create([
             'survey_id' => $this->survey->id,
-            'submittable_id' => $scaleSumittable->id
+            'submittable_id' => $scaleSubmittable->id
         ]);
         $attributes = [['question_id' => $scaleQuestion->id,'text' => '11']];
         $this->expectException(InvalidAnswerException::class);
@@ -157,7 +158,7 @@ class SurveyTest extends TestCase
 
     protected function addQuestion($overrides)
     {
-        $data = ['title' =>  'foo','submittable_type' => array_random(Question::SUBMITTABLE_TYPES)];
+        $data = ['title' =>  'foo','submittable_type' => array_random(Submittable::acceptTypes())];
         return $this->survey->addQuestion(array_merge($data, $overrides));
     }
 }

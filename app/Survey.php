@@ -36,8 +36,7 @@ class Survey extends Model
     public function addQuestion(array $attributes)
     {
         $question = $this->questions()->create(['title' => $attributes['title']]);
-        $type = $attributes['submittable_type'];
-        $class = array_get(Question::SUBMITTABLE_TYPES, $type, Question::SUBMITTABLE_TYPES['default']);
+        $class = Submittable::get($attributes['submittable_type']);
         (new $class)->buildQuestion($question, $attributes);
         return $question;
     }
