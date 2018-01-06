@@ -4,16 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\InvalidAnswerException;
-use App\Exceptions\ClassNotFound;
 
 class Survey extends Model
 {
-    const SUMMARY_STRATEGIES = [
-        'user_answer' => 'App\Summaries\UserAnswer',
-        'break_down' => 'App\Summaries\Breakdown',
-        'default' => 'App\Summaries\Breakdown'
-    ];
-
     protected $guarded = [];
 
     protected $with = ['author', 'questions'];
@@ -45,14 +38,13 @@ class Survey extends Model
     {
         $questions = $this->questions;
         return collect($attributes)->map(function ($item) use ($questions) {
-            $questionId = $item['question_id'];
             $text =  isset($item['text']) ? $item['text'] : '';
             throw_exception_unless(
-                $question = $questions->firstWhere('id', $questionId),
+                $question = $questions->firstWhere('id', $item['question_id']),
                 InvalidAnswerException::class
             );
             optional_method($question->submittable)->validAnswer($text);
-            return new Answer(['question_id' => $questionId,'text' => $text]);
+            return new Answer(['question_id' => $item['question_id'],'text' => $text]);
         });
     }
 
@@ -65,7 +57,7 @@ class Survey extends Model
 
     public function summary($strategy)
     {
-        $class = array_get(static::SUMMARY_STRATEGIES, $strategy, static::SUMMARY_STRATEGIES['default']);
+        $class = Summary::get($strategy);
         return new $class($this);
     }
 }

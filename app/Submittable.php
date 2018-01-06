@@ -2,8 +2,7 @@
 
 namespace App;
 
-
-class Submittable
+class Submittable extends StrategyFinder
 {
     const ACCEPTABLE_TYPES = [
         'open_submittable' => 'App\OpenSubmittable',
@@ -11,18 +10,4 @@ class Submittable
         'multiple_choice_submittable' => 'App\MultipleChoiceSubmittable',
         'default' => 'App\MultipleChoiceSubmittable'
     ];
-
-    public static function get($type)
-    {
-        return array_get(
-            static::ACCEPTABLE_TYPES,
-            $type,
-            static::ACCEPTABLE_TYPES['default']
-        );
-    }
-
-    public static function acceptTypes()
-    {
-        return array_keys(static::ACCEPTABLE_TYPES);
-    }
 }
