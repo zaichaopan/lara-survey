@@ -28,7 +28,7 @@ class QuestionForm extends FormRequest
     {
         return [
             'title' => 'required',
-            'submittable_type' => ['required', Rule::in(Submittable::acceptTypes())],
+            'submittable_type' => ['required', Rule::in(Submittable::available())],
             'options' => 'options',
             'minimum' => 'minscale',
             'maximum' => 'maxscale',

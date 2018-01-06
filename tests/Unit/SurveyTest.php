@@ -158,7 +158,7 @@ class SurveyTest extends TestCase
 
     protected function addQuestion($overrides)
     {
-        $data = ['title' =>  'foo','submittable_type' => array_random(Submittable::acceptTypes())];
+        $data = ['title' =>  'foo','submittable_type' => array_random(Submittable::available())];
         return $this->survey->addQuestion(array_merge($data, $overrides));
     }
 }

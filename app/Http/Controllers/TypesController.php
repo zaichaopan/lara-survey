@@ -28,7 +28,7 @@ class TypesController extends Controller
     protected function questionAttributes()
     {
         return request()->validate([
-            'submittable_type' => ['required', Rule::in(Submittable::acceptTypes())],
+            'submittable_type' => ['required', Rule::in(Submittable::available())],
             'options' => 'options',
             'minimum' => 'minscale',
             'maximum' => 'maxscale'

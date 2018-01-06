@@ -7,14 +7,14 @@ class StrategyFinder
     public static function get($type)
     {
         return array_get(
-            static::ACCEPTABLE_TYPES,
+            static::AVAILABLE_TYPES,
             $type,
-            static::ACCEPTABLE_TYPES['default']
+            static::AVAILABLE_TYPES['default']
         );
     }
 
-    public static function acceptTypes()
+    public static function available()
     {
-        return array_keys(static::ACCEPTABLE_TYPES);
+        return array_keys(static::AVAILABLE_TYPES);
     }
 }

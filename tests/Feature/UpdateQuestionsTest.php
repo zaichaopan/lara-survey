@@ -26,7 +26,7 @@ class UpdateQuestionsTest extends TestCase
 
         $this->viewChangeTypeForm(
             $question,
-            array_random(Submittable::acceptTypes())
+            array_random(Submittable::available())
         )->assertRedirect('login');
 
         // redirect because of unauthenticated
@@ -38,7 +38,7 @@ class UpdateQuestionsTest extends TestCase
         $this->updateQuestion($question, [])->assertStatus(403);
         $this->viewChangeTypeForm(
             $question,
-            array_random(Submittable::acceptTypes())
+            array_random(Submittable::available())
         )->assertStatus(403);
         $this->changeType($question, [])->assertStatus(403);
     }
