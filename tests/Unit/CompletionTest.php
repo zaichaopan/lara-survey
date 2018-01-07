@@ -20,13 +20,6 @@ class CompletionTest extends TestCase
     }
 
     /** @test */
-    public function it_belongs_to_a_participant()
-    {
-        $completion = factory('App\Completion')->create();
-        $this->assertInstanceOf(User::class, $completion->participant);
-    }
-
-    /** @test */
     public function it_can_add_answers()
     {
         $completion = factory('App\Completion')->create();

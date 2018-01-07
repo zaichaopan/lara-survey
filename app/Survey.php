@@ -2,9 +2,10 @@
 
 namespace App;
 
+use App\Summaries\Breakdown;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Model;
 use App\Mail\Invitation as InvitationEmail;
-use Illuminate\Support\Facades\Mail;
 
 class Survey extends Model
 {
@@ -31,6 +32,7 @@ class Survey extends Model
     {
         return $this->hasMany(Invitation::class);
     }
+
     public function addQuestion(array $attributes)
     {
         $question = $this->questions()->create(['title' => $attributes['title']]);
@@ -44,17 +46,21 @@ class Survey extends Model
         return collect($this->questions)->map->buildAnswer($attributes);
     }
 
-    public function completeBy(User $user, array $answersAttributes)
+    public function completeBy($invitation, array $answersAttributes)
     {
-        $completion = $this->completions()->create(['user_id' => $user->id]);
+        $completion = $this->createCompleton($invitation);
         $completion->addAnswers($this->buildAnswers($answersAttributes));
         return $completion;
     }
 
-    public function summary($strategy)
+    public function createCompleton(Invitation $invitation)
     {
-        $class = Summary::get($strategy);
-        return new $class($this);
+        return $this->completions()->create(['invitation_id' => $invitation->id ]);
+    }
+
+    public function summary()
+    {
+        return new Breakdown($this);
     }
 
     public function sendInvitation($data)
@@ -68,12 +74,17 @@ class Survey extends Model
         return $this->invitations()->create([
             'recipient_email' => $data['email'],
             'message' => $data['message'],
-            'token' => str_limit(md5($data['email'] . str_random()), 25, '')
+            'token' => TokenGenerator::generate($data['email'])
            ]);
     }
 
     public function hasSentTo($recipient)
     {
-       return $this->invitations()->where('recipient_email', $recipient)->exists();
+        return $this->invitations()->where('recipient_email', $recipient)->exists();
+    }
+
+    public function findInvitationForToken($token)
+    {
+        return $this->invitations()->whereToken($token)->firstOrFail();
     }
 }

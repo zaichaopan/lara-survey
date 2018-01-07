@@ -17,6 +17,6 @@ Route::resource('surveys', 'SurveysController', ['except' => ['edit', 'destroy']
 Route::resource('surveys.questions', 'QuestionsController', ['except' => ['index', 'destroy']]);
 Route::resource('questions.types', 'TypesController', ['only' => ['create','store']]);
 Route::resource('surveys.completions', 'CompletionsController', ['only' => ['show', 'create', 'store']]);
-Route::resource('surveys.summaries', 'SummariesController', ['only' => ['show']]);
 Route::resource('surveys.invitations', 'InvitationsController', ['only' => ['create', 'store']]);
+Route::get('/surveys/{survey}/summaries', 'SummariesController@show')->name('surveys.summaries.show');
 Auth::routes();

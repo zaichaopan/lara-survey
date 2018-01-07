@@ -9,19 +9,28 @@ class ViewSummaryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function guests_cannot_view_survey_summary()
+    public function setUp()
     {
-        $this->get(route('surveys.summaries.show', ['survey' => 1, 'summary' => 'break_down']))->assertRedirect('login');
+        parent::setUp();
+        $this->author = factory('App\User')->create();
+        $this->survey = factory('App\Survey')->create([
+            'user_id' => $this->author->id
+        ]);
+        $this->other = factory('App\User')->create();
     }
 
     /** @test */
-    public function auth_user_can_view_survey_summary()
+    public function non_author_cannot_view_survey_summary()
     {
-        $this->withoutExceptionHandling();
-        $survey = factory('App\Survey')->create();
+        $this->viewSummary()->assertRedirect('login');
+        $this->login($this->other);
+        $this->viewSummary()->assertStatus(403);
+    }
 
-        $multipleChoiceQuestion = createMultipleChoiceQuestion($survey);
+    /** @test */
+    public function author_user_can_view_survey_summary()
+    {
+        $multipleChoiceQuestion = createMultipleChoiceQuestion($this->survey);
 
         $scaleSubmittable = factory('App\ScaleSubmittable')->create([
              'minimum' => 1,
@@ -29,13 +38,13 @@ class ViewSummaryTest extends TestCase
         ]);
 
         $scaleQuestion = factory('App\Question')->states('scale')->create([
-             'survey_id' => $survey->id,
+             'survey_id' => $this->survey->id,
              'submittable_id' => $scaleSubmittable->id
          ]);
 
-        $openQuestion = factory('App\Question')->states('open')->create(['survey_id' => $survey->id]);
+        $openQuestion = factory('App\Question')->states('open')->create(['survey_id' => $this->survey->id]);
 
-        $completion = factory('App\Completion')->create(['survey_id' => $survey->id]);
+        $completion = factory('App\Completion')->create(['survey_id' => $this->survey->id]);
 
         $answerMultipleChoice = factory('App\Answer')->create([
              'question_id' => $multipleChoiceQuestion->id,
@@ -55,10 +64,10 @@ class ViewSummaryTest extends TestCase
              'text' => 'Hello world!'
         ]);
 
-        $this->login();
+        $this->login($this->author);
 
-        $this->get(route('surveys.summaries.show', ['survey' => $survey, 'summary' => 'break_down']))
-             ->assertSee($survey->title)
+        $this->viewSummary()
+             ->assertSee($this->survey->title)
             ->assertSee('3 questions')
             ->assertSee('1 completions')
             ->assertSee($multipleChoiceQuestion->options[0]->text)
@@ -67,7 +76,8 @@ class ViewSummaryTest extends TestCase
             ->assertSee('Hello world');
     }
 
-    public function auth_user_can_view_his_own_answers()
+    protected function viewSummary()
     {
+        return $this->get(route('surveys.summaries.show', ['survey' => $this->survey]));
     }
 }

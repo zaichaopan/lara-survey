@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Survey;
 
-
 class InvitationsController extends Controller
 {
     public function __construct()

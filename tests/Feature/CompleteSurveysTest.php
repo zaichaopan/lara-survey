@@ -9,39 +9,58 @@ class CompleteSurveysTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function guest_user_cannot_complete_survey()
+    public function setUp()
     {
-        $this->get(route('surveys.show', ['survey' => 1]))->assertRedirect('login');
-        $this->post(route('surveys.completions.store', ['survey' => 1]))->assertStatus(302);
+        parent::setUp();
+        $this->auth = factory('App\User')->create();
+        $this->other = factory('App\User')->create();
+        $this->survey = factory('App\Survey')->create();
+        $this->recipientEmail = 'john@example.com';
+        $this->invitation = factory('App\Invitation')->create(
+            [
+                'survey_id' => $this->survey->id,
+                'recipient_email' => $this->recipientEmail
+            ]
+        );
     }
 
     /** @test */
-    public function user_can_only_complete_once_for_a_survey()
+    public function a_valid_token_is_required()
     {
-        $this->login();
-        $completion = factory('App\Completion')->create(['user_id' => auth()->id()]);
-        $this->postAnswers($completion->survey, [])->assertStatus(400);
+        $this->viewSurvey('invalid_token')->assertStatus(404);
+        $this->postAnswers(['token' => 'invalid_token'])->assertStatus(404);
+    }
+
+    /** @test */
+    public function recipent_can_only_complete_once_for_a_survey()
+    {
+        $this->withoutExceptionHandling();
+        $completion = factory('App\Completion')->create([
+            'invitation_id' => $this->invitation->id,
+            'survey_id' => $this->survey->id
+        ]);
+        $this->postAnswers(['token' => $this->invitation->token])
+            ->assertSessionHas('message', 'You have already completed the survey!');
     }
 
     /** @test */
     public function answers_attributes_are_required()
     {
-        $this->login();
-        $completion = factory('App\Completion')->create();
-        $this->postAnswers($completion->survey, [])->assertSessionHasErrors('answers_attributes');
-        $this->postAnswers($completion->survey, [
-            'answers_attributes' => []
-        ])->assertSessionHasErrors('answers_attributes');
+        $this->postAnswers(['token' => $this->invitation->token])
+            ->assertSessionHasErrors('answers_attributes');
+
+        $this->postAnswers([
+            'token' => $this->invitation->token,
+            'answers_attributes' => []])
+            ->assertSessionHasErrors('answers_attributes');
     }
 
     /** @test */
     public function answers_number_must_match_question_number()
     {
-        $this->login();
-        $survey = factory('App\Survey')->create();
-        $questions = factory('App\Question', 2)->create(['survey_id' => $survey->id]);
-        $this->postAnswers($survey, [
+        $questions = factory('App\Question', 2)->create(['survey_id' => $this->survey->id]);
+        $this->postAnswers([
+            'token' => $this->invitation->token,
             'answers_attributes' => [
                 "{$questions[0]->id}" =>[ 'text' => 'foobar' ],
              ]
@@ -51,9 +70,9 @@ class CompleteSurveysTest extends TestCase
     /** @test */
     public function can_not_answer_questions_in_other_surveys()
     {
-        $this->login();
-        $question = factory('App\Question')->create();
-        $this->postAnswers($question->survey, [
+        $question = factory('App\Question')->create(['survey_id' => $this->survey->id]);
+        $this->postAnswers([
+            'token' => $this->invitation->token,
             'answers_attributes' => [
                 "100" => ['text' => 'foobar'],
              ]
@@ -63,11 +82,11 @@ class CompleteSurveysTest extends TestCase
     /** @test */
     public function multiple_choice_question_answer_must_exist_in_its_options()
     {
-        $this->login();
-        $question = createMultipleChoiceQuestion();
+        $question = createMultipleChoiceQuestion($this->survey);
         $invalidAnswerText = 'foobar';
         $this->assertFalse(in_array($invalidAnswerText, $question->options->pluck('text')->all()));
-        $this->postAnswers($question->survey, [
+        $this->postAnswers([
+            'token' => $this->invitation->token,
             'answers_attributes' => [
                "{$question->jd}" => ['text' => $invalidAnswerText]
              ]
@@ -77,12 +96,15 @@ class CompleteSurveysTest extends TestCase
     /** @test */
     public function scale_question_answer_must_between_min_and_max()
     {
-        $this->login();
         $scaleSubmittable = factory('App\ScaleSubmittable')->create(['minimum' => 1, 'maximum' => 5]);
+
         $question = factory('App\Question')->states('scale')->create([
-            'submittable_id' => $scaleSubmittable->id
+            'submittable_id' => $scaleSubmittable->id,
+            'survey_id' => $this->survey->id
         ]);
-        $this->postAnswers($question->survey, [
+
+        $this->postAnswers([
+            'token' => $this->invitation->token,
             'answers_attributes' => [
                 "{$question->id}" => ['text' => '11']
              ]
@@ -90,17 +112,18 @@ class CompleteSurveysTest extends TestCase
     }
 
     /** @test */
-    public function auth_user_can_complete_survey()
+    public function recipient_can_complete_survey()
     {
-        $this->login();
-        $survey = factory('App\Survey')->create();
-        $multipleChoiceQuestion = createMultipleChoiceQuestion($survey);
-        $scaleQuestion = factory('App\Question')->states('scale')->create(['survey_id' => $survey->id]);
-        $openQuestion = factory('App\Question')->states('open')->create(['survey_id' => $survey->id]);
+        $multipleChoiceQuestion = createMultipleChoiceQuestion($this->survey);
+        $scaleQuestion = factory('App\Question')->states('scale')
+            ->create(['survey_id' => $this->survey->id]);
+        $openQuestion = factory('App\Question')->states('open')
+            ->create(['survey_id' => $this->survey->id]);
 
-        $this->postAnswers($survey, [
+        $this->postAnswers([
+            'token' => $this->invitation->token,
             'answers_attributes' => [
-                "{$multipleChoiceQuestion->id}" =>[
+                "{$multipleChoiceQuestion->id}" => [
                     'text' => $multipleChoiceQuestion->options->first()->text,
                 ],
                 "{$scaleQuestion->id}" => [
@@ -112,18 +135,22 @@ class CompleteSurveysTest extends TestCase
              ]
         ]);
 
-        $survey = $survey->fresh();
-        $this->assertTrue(auth()->user()->hasCompleted($survey));
-        $this->assertCount(1, $survey->completions);
-        $answers = $survey->completions[0]->answers;
+        $this->survey = $this->survey->fresh();
+        $this->assertCount(1, $this->survey->completions);
+        $answers = $this->survey->completions[0]->answers;
         $this->assertCount(3, $answers);
         $this->assertEquals([
             $multipleChoiceQuestion->options->first()->text, $scaleQuestion->submittable->maximum, 'foobar'
         ], $answers->pluck('text')->all());
     }
 
-    protected function postAnswers($survey, $data)
+    protected function viewSurvey($token)
     {
-        return $this->post(route('surveys.completions.store', ['survey' => $survey]), $data);
+        return $this->get(route('surveys.completions.create', ['survey' => $this->survey, 'token' => $token]));
+    }
+
+    protected function postAnswers($data)
+    {
+        return $this->post(route('surveys.completions.store', ['survey' => $this->survey]), $data);
     }
 }

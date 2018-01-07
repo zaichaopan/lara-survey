@@ -2,7 +2,7 @@
 
 namespace App\Summaries;
 
-class BreakDown
+class Breakdown
 {
     protected $survey;
 

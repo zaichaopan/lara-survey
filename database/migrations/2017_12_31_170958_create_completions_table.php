@@ -16,7 +16,7 @@ class CreateCompletionsTable extends Migration
         Schema::create('completions', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('survey_id');
-            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('invitation_id');
             $table->timestamps();
         });
     }

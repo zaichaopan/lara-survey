@@ -15,9 +15,9 @@ class Completion extends Model
         return $this->belongsTo(Survey::class);
     }
 
-    public function participant()
+    public function invitation()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(invitation::class);
     }
 
     public function answers()

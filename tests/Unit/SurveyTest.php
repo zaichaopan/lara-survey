@@ -4,12 +4,14 @@ namespace Tests\Unit;
 
 use App\Question;
 use Tests\TestCase;
+use App\Submittable;
 use App\OpenSubmittable;
 use App\ScaleSubmittable;
 use App\MultipleChoiceSubmittable;
+use Illuminate\Support\Facades\Mail;
 use App\Exceptions\InvalidAnswerException;
+use App\Mail\Invitation as InvitationEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Submittable;
 
 class SurveyTest extends TestCase
 {
@@ -33,6 +35,16 @@ class SurveyTest extends TestCase
     {
         $question = factory('App\Question')->create(['survey_id' => $this->survey->id]);
         $this->assertTrue($this->survey->questions->contains($question));
+    }
+
+    /** @test */
+    public function it_has_invitations()
+    {
+        $invitation = factory('App\Invitation')->create([
+            'survey_id' => $this->survey->id
+        ]);
+        $this->assertNotNull($this->survey->findInvitationForToken($invitation->token));
+        $this->assertTrue($this->survey->hasSentTo($invitation->recipient_email));
     }
 
     /** @test */
@@ -134,11 +146,41 @@ class SurveyTest extends TestCase
     }
 
     /** @test */
+    public function it_can_creaate_invitation()
+    {
+        $invitation = $this->survey->createInvitation([
+            'email' => 'john@example.com',
+            'message' => 'Hello world'
+        ]);
+
+        $this->assertTrue($this->survey->invitations->contains($invitation->id));
+    }
+
+    /** @test */
+    public function it_can_send_invitation()
+    {
+        Mail::fake();
+        $recipientEmail = 'john@example.com';
+        $this->survey->sendInvitation([
+           'email' => $recipientEmail,
+            'message' => 'Hello world'
+       ]);
+
+        Mail::assertSent(InvitationEmail::class, function ($mail) use ($recipientEmail) {
+            return $mail->hasTo($recipientEmail);
+        });
+    }
+
+    /** @test */
     public function it_can_be_completed()
     {
         $user = factory('App\User')->create();
         $question = createMultipleChoiceQuestion($this->survey);
-        $completion = $this->survey->completeBy($user, [
+        $invitation = factory('App\Invitation')->create([
+            'survey_id' => $this->survey->id,
+            'recipient_email' => $user->email
+        ]);
+        $completion = $this->survey->completeBy($invitation, [
             "{$question->id}"=>[
                 'text' => $question->options->first()->text
             ]
@@ -149,14 +191,14 @@ class SurveyTest extends TestCase
     /** @test */
     public function it_has_a_summary()
     {
-        $summary = $this->survey->summary('break_down');
+        $summary = $this->survey->summary();
 
         $this->assertEquals(0, $summary->questionsCount);
         $this->assertEquals(0, $summary->completionsCount);
         $completion = factory('App\Completion')->create(['survey_id' => $this->survey->id]);
         factory('App\Question', 2)->create(['survey_id' => $this->survey->id]);
         tap($this->survey->fresh(), function ($survey) {
-            $summary = $survey->summary('break_down');
+            $summary = $survey->summary();
             $this->assertEquals(2, $summary->questionsCount);
             $this->assertEquals(1, $summary->completionsCount);
         });

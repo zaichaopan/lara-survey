@@ -12,4 +12,9 @@ class Invitation extends Model
     {
         return $this->belongsTo(Survey::class);
     }
+
+    public function completion()
+    {
+        return $this->hasOne(Completion::class);
+    }
 }

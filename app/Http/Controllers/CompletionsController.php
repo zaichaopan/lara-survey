@@ -7,20 +7,33 @@ use App\Completion;
 
 class CompletionsController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware('auth');
-    // }
-
     public function create(Survey $survey)
     {
+        $invitation = $survey->findInvitationForToken(request('token'));
+        return view('completions.create', compact('invitation', 'survey'));
+    }
+
+    public function show(Survey $survey, Completion $completion)
+    {
+        $invitation = $survey->findInvitationForToken(request('token'));
+        return view('completions.show', compact('completion'));
     }
 
     public function store(Survey $survey)
     {
-        abort_if(auth()->user()->hasCompleted($survey), 400);
-        $completion = $survey->completeBy(auth()->user(), $this->answersAttributes($survey));
-        return redirect(route('surveys.show', ['survey' => $survey]));
+        $invitation = $survey->findInvitationForToken(request('token'));
+
+        if ($invitation->completion) {
+            return back()->with('message', 'You have already completed the survey!');
+        }
+
+        $completion = $survey->completeBy($invitation, $this->answersAttributes($survey));
+
+        return redirect(route('surveys.completions.show', [
+            'survey' => $survey,
+            'completion' => $completion,
+            'token' => requst('token')
+        ]));
     }
 
     protected function answersAttributes($survey)
