@@ -7,9 +7,13 @@ use App\Completion;
 
 class CompletionsController extends Controller
 {
-    public function __construct()
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    // }
+
+    public function create(Survey $survey)
     {
-        $this->middleware('auth');
     }
 
     public function store(Survey $survey)
@@ -17,11 +21,6 @@ class CompletionsController extends Controller
         abort_if(auth()->user()->hasCompleted($survey), 400);
         $completion = $survey->completeBy(auth()->user(), $this->answersAttributes($survey));
         return redirect(route('surveys.show', ['survey' => $survey]));
-    }
-
-    public function show(Completion $completion)
-    {
-        return view('completions.show', compact('completion'));
     }
 
     protected function answersAttributes($survey)

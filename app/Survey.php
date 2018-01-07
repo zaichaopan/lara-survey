@@ -3,7 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Exceptions\InvalidAnswerException;
+use App\Mail\Invitation as InvitationEmail;
+use Illuminate\Support\Facades\Mail;
 
 class Survey extends Model
 {
@@ -26,6 +27,10 @@ class Survey extends Model
         return $this->hasMany(Completion::class);
     }
 
+    public function invitations()
+    {
+        return $this->hasMany(Invitation::class);
+    }
     public function addQuestion(array $attributes)
     {
         $question = $this->questions()->create(['title' => $attributes['title']]);
@@ -50,5 +55,25 @@ class Survey extends Model
     {
         $class = Summary::get($strategy);
         return new $class($this);
+    }
+
+    public function sendInvitation($data)
+    {
+        $invitation = $this->createInvitation($data);
+        Mail::to($data['email'])->send(new InvitationEmail($invitation));
+    }
+
+    public function createInvitation($data)
+    {
+        return $this->invitations()->create([
+            'recipient_email' => $data['email'],
+            'message' => $data['message'],
+            'token' => str_limit(md5($data['email'] . str_random()), 25, '')
+           ]);
+    }
+
+    public function hasSentTo($recipient)
+    {
+       return $this->invitations()->where('recipient_email', $recipient)->exists();
     }
 }
