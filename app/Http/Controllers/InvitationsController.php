@@ -24,6 +24,6 @@ class InvitationsController extends Controller
         ]);
 
         $survey->sendInvitation($validatedData);
-        return back()->with('message', 'Invitation has been sent!');
+        return back()->with('message', 'Your invitation has been sent!');
     }
 }

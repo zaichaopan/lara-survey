@@ -1,10 +1,14 @@
-@foreach($completion->answers as $index=> $answer)
-    <ul>
-       <li>{{$answer->question->title}}</li>
-        @include("questions._{$answer->question->submitType}", [
-            'question' => $answer->question,
-            'answer' => $answer,
-            'index' => $index
-        ])
-    </ul>
-@endforeach
+@extends('layouts.app')
+@section('content')
+    <div>
+        Thank you very much for your participation! The following is your answer?
+    </div>
+    @foreach($completion->answers as $index=> $answer)
+        <ul>
+           <li>
+                <strong>{{$answer->question->title}}</strong>
+                <p>Your answer: {{$answer->text}}</p>
+            </li>
+        </ul>
+    @endforeach
+@endsection

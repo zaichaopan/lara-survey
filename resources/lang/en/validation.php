@@ -103,6 +103,15 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
+        'options' => [
+            'options' => 'Options are required!'
+        ],
+         'minimum' => [
+            'minscale' => 'MinScale is required'
+        ],
+        'maximum' => [
+            'maxscale' => 'Maximum must be greater than minimum!'
+        ],
     ],
 
     /*

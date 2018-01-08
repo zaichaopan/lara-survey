@@ -16,7 +16,9 @@ class MultipleChoiceSubmittable extends Model
 
     public function buildQuestion(Question $question, array $questionAttributes)
     {
-        $options = collect($questionAttributes['options'])->map(function ($optionAttribute) {
+        $options = collect($questionAttributes['options'])->filter(function ($optionAttribute) {
+            return isset($optionAttribute);
+        })->map(function ($optionAttribute) {
             return new Option(['text' => $optionAttribute]);
         });
 

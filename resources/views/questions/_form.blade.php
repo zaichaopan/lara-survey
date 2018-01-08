@@ -5,7 +5,7 @@
 <div class="form-group">
     <label class="control-label col-sm-2">Title: </label>
     <div class="col-sm-10">
-        <input class="form-control input-sm" type="text" name="title" value="{{$question->title}}">
+        <input class="form-control input-sm" type="text" name="title" value="{{old('title') ?? $question->title}}">
     </div>
 </div>
 

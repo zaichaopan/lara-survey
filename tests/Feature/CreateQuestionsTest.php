@@ -56,6 +56,12 @@ class CreateQuestionsTest extends TestCase
             'submittable_type' => 'multiple_choice_submittable',
             'options' => [],
         ])->assertSessionHasErrors('options');
+
+
+        $this->createQuestion([
+            'submittable_type' => 'multiple_choice_submittable',
+            'options' => [null],
+        ])->assertSessionHasErrors('options');
     }
 
     /** @test */
@@ -119,13 +125,13 @@ class CreateQuestionsTest extends TestCase
     {
         $this->createQuestion([
             'submittable_type' => 'multiple_choice_submittable',
-            'options' => ['foo', 'bar', 'baz'] ]);
+            'options' => ['foo', null, 'baz'] ]);
 
         $survey = auth()->user()->surveys->first();
         $question = $survey->fresh()->questions->first();
 
         $this->assertInstanceOf(MultipleChoiceSubmittable::class, $question->submittable);
-        $this->assertEquals(['foo', 'bar', 'baz'], $question->options->pluck('text')->all());
+        $this->assertEquals(['foo', 'baz'], $question->options->pluck('text')->all());
     }
 
     /** @test */

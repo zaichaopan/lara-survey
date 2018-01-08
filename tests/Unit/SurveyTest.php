@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Survey;
 use App\Question;
 use Tests\TestCase;
 use App\Submittable;
@@ -28,6 +29,14 @@ class SurveyTest extends TestCase
     public function it_has_an_author()
     {
         $this->assertEquals($this->user->id, $this->survey->author->id);
+    }
+
+    /** @test */
+    public function it_get_surveys_of_a_author()
+    {
+        $surveys = Survey::byAuthor($this->user)->get();
+        $this->assertCount(1, $surveys);
+        $this->assertEquals($this->survey->id, $surveys->first()->id);
     }
 
     /** @test */

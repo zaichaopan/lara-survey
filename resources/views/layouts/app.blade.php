@@ -54,6 +54,9 @@
                     <!-- Left Side Of Navbar -->
                     <ul class="nav navbar-nav">
                         &nbsp;
+                        @auth
+                          <li><a href="{{ route('surveys.index') }}">Surveys</a></li>
+                        @endauth
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -89,6 +92,7 @@
         </nav>
 
         <div class="container">
+            @include('shared._message')
             @yield('content')
         </div>
     </div>

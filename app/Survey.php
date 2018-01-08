@@ -33,6 +33,11 @@ class Survey extends Model
         return $this->hasMany(Invitation::class);
     }
 
+    public function scopeByAuthor($query, User $user)
+    {
+        return $query->where('user_id', $user->id);
+    }
+
     public function addQuestion(array $attributes)
     {
         $question = $this->questions()->create(['title' => $attributes['title']]);

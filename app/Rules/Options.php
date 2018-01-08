@@ -28,7 +28,8 @@ class Options implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $this->request->submittable_type !== 'multiple_choice_submittable' || (is_array($value) &&  count($value));
+        return $this->request->submittable_type !== 'multiple_choice_submittable' ||
+        (is_array($value) && count($value) && !! $value[0]);
     }
 
     /**

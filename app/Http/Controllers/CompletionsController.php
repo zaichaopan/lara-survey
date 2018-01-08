@@ -32,7 +32,7 @@ class CompletionsController extends Controller
         return redirect(route('surveys.completions.show', [
             'survey' => $survey,
             'completion' => $completion,
-            'token' => requst('token')
+            'token' => request('token')
         ]));
     }
 

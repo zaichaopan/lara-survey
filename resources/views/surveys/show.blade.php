@@ -17,26 +17,23 @@
         <a href="{{route('surveys.questions.create', ['survey' => $survey, 'submittable_type' => 'open_submittable'])}}">
             Add Open Question
         </a>
-        @if(auth()->user()->hasCompleted($survey))
         &#124
-        <a href="{{route('surveys.summaries.show', ['survey'=>$survey, 'summary' => 'user_answer'])}}">
-            Your Answers
+        <a href="{{route('surveys.invitations.create', ['survey' => $survey])}}">
+            Invite
         </a>
-        @endif
+         &#124
+
+        <a href="{{route('surveys.summaries.show', ['survey' => $survey])}}">
+        View Summaries
+        </a>
     </div>
     <hr>
 
-    <form action="{{route('surveys.completions.store', ['survey' => $survey])}}" method="POST">
-        {{ csrf_field()}}
-        @foreach($survey->questions as $index => $question )
-         <ul>
-             <li>{{ $index+1}}. {{ $question->title}}</li>
-             @include("{$question->submittableType()}s._show")
-         </ul>
-         @endforeach
+    @foreach($survey->questions as $index => $question )
+     <ul>
+         <li>{{ $index+1}}. {{ $question->title}}</li>
+         @include("{$question->submittableType()}s._show")
+     </ul>
+     @endforeach
 
-         <div class="form-group">
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
-    </form>
 @endsection

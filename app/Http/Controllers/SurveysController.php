@@ -13,7 +13,7 @@ class SurveysController extends Controller
 
     public function index()
     {
-        $surveys = Survey::latest()->get();
+        $surveys = Survey::byAuthor(auth()->user())->latest()->get();
         return view('surveys.index', compact('surveys'));
     }
 
