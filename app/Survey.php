@@ -60,7 +60,7 @@ class Survey extends Model
 
     public function createCompleton(Invitation $invitation)
     {
-        return $this->completions()->create(['invitation_id' => $invitation->id ]);
+        return $this->completions()->create(['invitation_id' => $invitation->id]);
     }
 
     public function summary()
@@ -91,5 +91,10 @@ class Survey extends Model
     public function findInvitationForToken($token)
     {
         return $this->invitations()->whereToken($token)->firstOrFail();
+    }
+
+    public function availableSubmittableTypes()
+    {
+        return array_keys(array_except( Submittable::AVAILABLE_TYPES, 'default'));
     }
 }

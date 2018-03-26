@@ -108,7 +108,7 @@ class Question extends Model
 
     public function openSubmitSummary()
     {
-        return $this->answers-> whereNotIn('text', [null, ''])->all();
+        return $this->answers->whereNotIn('text', [null, ''])->all();
     }
 
     public function buildAnswer($attributes)
@@ -119,6 +119,19 @@ class Question extends Model
         );
         $text = $attributes[$this->id]['text'];
         optional_method($this->submittable)->validAnswerText($text);
-        return new Answer(['question_id' => $this->id, 'text'=> $text]);
+        return new Answer(['question_id' => $this->id, 'text' => $text]);
+    }
+
+    public function alternativeTypes()
+    {
+        $currentType = (new \ReflectionObject($this->submittable))->getName();
+
+        return
+        array_keys(array_where(
+            Submittable::AVAILABLE_TYPES,
+            function ($value, $key) use ($currentType) {
+                return $value != $currentType && $key != 'default';
+            }
+        ));
     }
 }

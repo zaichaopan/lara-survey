@@ -1,77 +1,76 @@
-@extends('layouts.app')
+@extends('layouts.guest')
 
-@section('content')
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">Register</div>
+@section('guest.content')
+<div class="container flex mx-auto justify-center items-center min-h-screen">
+    <div class="w-full max-w-xs border-t-4 border-teal rounded-b pt-3 rounded shadow-md">
 
-                <div class="panel-body">
-                    <form class="form-horizontal" method="POST" action="{{ route('register') }}">
-                        {{ csrf_field() }}
-
-                        <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }}">
-                            <label for="name" class="col-md-4 control-label">Name</label>
-
-                            <div class="col-md-6">
-                                <input id="name" type="text" class="form-control" name="name" value="{{ old('name') }}" required autofocus>
-
-                                @if ($errors->has('name'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('name') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                            <label for="email" class="col-md-4 control-label">E-Mail Address</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required>
-
-                                @if ($errors->has('email'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-                            <label for="password" class="col-md-4 control-label">Password</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control" name="password" required>
-
-                                @if ($errors->has('password'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('password') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password-confirm" class="col-md-4 control-label">Confirm Password</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="col-md-6 col-md-offset-4">
-                                <button type="submit" class="btn btn-primary">
-                                    Register
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+        <div class="text-grey-dark text-center">
+            <h2>Create a FREE account</h2>
+            <p class="pb-3 pt-1 text-sm">...and build your survey in seconds</p>
         </div>
+
+        <form class="px-4 pt-6 pb-8" method="POST" action="{{ route('register') }}">
+            {{ csrf_field() }}
+
+            <div class="mb-4">
+                <input class="bg-grey-lighter appearance-none border-2 border-grey-lighter hover:border-purple rounded w-full py-2 px-4 text-grey-darker"
+                       id="name"
+                       type="text"
+                       name="name"
+                       value="{{ old('name') }}"
+                       placeholder="Username"
+                       autofocus>
+
+                    @if ($errors->has('name'))
+                        <p class="text-red text-xs italic mt-3">{{ $errors->first('name')}}</p>
+                    @endif
+            </div>
+
+            <div class="mb-4">
+                <input class="bg-grey-lighter appearance-none border-2 border-grey-lighter hover:border-purple rounded w-full py-2 px-4 text-grey-darker"
+                       id="email"
+                       type="email"
+                       name="email"
+                       value="{{ old('email') }}"
+                       placeholder="Email"
+                       autofocus>
+
+                @if ($errors->has('email'))
+                <p class="text-red text-xs italic mt-3">{{ $errors->first('email')}}</p>
+                @endif
+            </div>
+
+            <div class="mb-6">
+                <input type="password"
+                       class="bg-grey-lighter appearance-none border-2 border-grey-lighter hover:border-purple rounded w-full py-2 px-4 text-grey-darker"
+                       id="password" name="password"
+                       placeholder="Password"
+                       required>
+
+                @if ($errors->has('password'))
+                <p class="text-red text-xs italic mt-3">{{ $errors->first('password')}}</p>
+                @endif
+            </div>
+
+            <div class="mb-6">
+                <input type="password"
+                       class="bg-grey-lighter appearance-none border-2 border-grey-lighter hover:border-purple rounded w-full py-2 px-4 text-grey-darker"
+                       id="password-confirm"
+                       name="password_confirmation"
+                       placeholder="Confirm password"
+                       required>
+            </div>
+
+            <div class="flex w-full">
+                <button class="bg-teal hover:bg-teal-light text-white font-bold py-2 px-4 rounded-full w-full" type="submit">
+                   Register
+                </button>
+            </div>
+        </form>
+        <p class="text-center text-grey-darker text-xs bg-grey-lighter py-6">
+            Alreay have an account? <a href="{{ route('login') }}" class="font-bold text-grey-darkest text-sm">Login</a>
+        </p>
+
     </div>
 </div>
 @endsection

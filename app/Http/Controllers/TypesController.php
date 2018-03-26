@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Question;
-use Illuminate\Validation\Rule;
 use App\Submittable;
+use Illuminate\Validation\Rule;
 
 class TypesController extends Controller
 {
@@ -13,7 +13,7 @@ class TypesController extends Controller
         $this->middleware('can:update,question');
     }
 
-    public function create(Question $question)
+    public function edit(Question $question, $submittableType)
     {
         $question = $question->buildAttributes($submittableType);
         return view('types.create', compact('question'));
@@ -22,6 +22,7 @@ class TypesController extends Controller
     public function store(Question $question)
     {
         $question->switchType($this->questionAttributes());
+
         return redirect(route('surveys.show', ['survey' => $question->survey]));
     }
 
